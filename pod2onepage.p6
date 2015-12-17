@@ -32,17 +32,17 @@ sub parse-pod-file ($f) {
 
 	# We have to deal with special chars in a files path (.. / case insensiblility on NTFS etc) to store it in a cache. Instead of fiddeling with those chars, we just turn the entire path into base64.
 
-	my $cached-path = $cache-dir ~ encode-base64($f, :str);
-	my $cached-io = $cached-path.IO;
+#	my $cached-path = $cache-dir ~ encode-base64($f, :str);
+#	my $cached-io = $cached-path.IO;
 
-	if $cached-io.e && $cached-io.modified >= $io.modified {
-		verbose "cached $f as $cached-path";
-		return $cached-io.slurp;
-	}else{
-		verbose "processing $f as $cached-path";
+#	if $cached-io.e && $cached-io.modified >= $io.modified {
+#		verbose "cached $f as $cached-path";
+#		return $cached-io.slurp;
+#	}else{
+		verbose "processing $f "; # as $cached-path";
 		my $pod = (EVAL ($io.slurp ~ "\n\$=pod"));
 		my $html = $pod>>.&handle();
-		$cached-io.spurt($html);
+#		$cached-io.spurt($html);
 		return $html;
-	}
+#	}
 }
