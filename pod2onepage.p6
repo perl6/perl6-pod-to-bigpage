@@ -5,14 +5,15 @@ use Pod::To::BigPage;
 
 PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => %*ENV<THREADS>.?Int // 2);
 
-my &verbose := &note;
+my &verbose = sub (|c) {};
 
 my $source-dir = '../../doc/doc/';
 my $cache-dir = 'tmp/';
 
 my @toc;
 
-sub MAIN () {
+sub MAIN (:v(:verbose($v))) {
+	&verbose = &note if $v;
 	setup();
 	set-foreign-toc(@toc);
 	put compose-before-content;
