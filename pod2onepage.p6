@@ -10,8 +10,11 @@ my &verbose := &note;
 my $source-dir = '../../doc/doc/';
 my $cache-dir = 'tmp/';
 
+my @toc;
+
 sub MAIN () {
 	setup();
+	set-foreign-toc(@toc);
 	put compose-before-content;
 	put await do start { .&parse-pod-file } for sort find-pod-files $source-dir;
 	put compose-toc() ~ compose-after-content;
