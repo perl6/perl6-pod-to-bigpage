@@ -1,13 +1,20 @@
 use v6;
 
 use Base64;
+use Pod::To::BigPage;
 
-PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => 2);
+PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => %*ENV<THREADS>.?Int // 2);
+
+my &verbose := &note;
+
 my $source-dir = '../../doc/doc/';
 my $cache-dir = 'tmp/';
 
 sub MAIN () {
+	setup();
+	put compose-before-content;
 	put await do start { .&parse-pod-file } for sort find-pod-files $source-dir;
+	put compose-toc() ~ compose-after-content;
 }
 
 sub find-pod-files ($dir) {
@@ -22,16 +29,17 @@ sub parse-pod-file ($f) {
 
 	# We have to deal with special chars in a files path (.. / case insensiblility on NTFS etc) to store it in a cache. Instead of fiddeling with those chars, we just turn the entire path into base64.
 
-#	my $cache-path = $cache-dir ~ encode-base64($f, :str);
-#	my $cache-io = $cache-path.IO;
+	my $cached-path = $cache-dir ~ encode-base64($f, :str);
+	my $cached-io = $cached-path.IO;
 
-	# if $cache-io.f && $cache-io.modified >= $io.modified {
-	# 	put "cached $f as $cache-path";
-	# 	return EVAL $cache-io.slurp;
-	# }else{
-		put "processing $f"; # as $cache-path";
+	if $cached-io.e && $cached-io.modified >= $io.modified {
+		verbose "cached $f as $cached-path";
+		return $cached-io.slurp;
+	}else{
+		verbose "processing $f as $cached-path";
 		my $pod = (EVAL ($io.slurp ~ "\n\$=pod"));
-	#	$cache-io.spurt($pod.perl);
-		return $pod;
-	# }
+		my $html = $pod>>.&handle();
+		$cached-io.spurt($html);
+		return $html;
+	}
 }
