@@ -20,7 +20,7 @@ sub MAIN () {
 sub find-pod-files ($dir) {
 	gather for dir($dir) {
 		take .Str if .extension ~~ rx:i/pod$/;
-		take slip find-pod-files $_ if .d;
+		take slip sort find-pod-files $_ if .d;
 	}
 }
 
