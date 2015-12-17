@@ -110,7 +110,7 @@ method render ($pod:) is export {
 	compose-toc() ~ compose-after-content
 }
 
-my enum Context ( None => 0, Index => 1 , Heading => 2);
+my enum Context ( None => 0, Index => 1 , Heading => 2, HTML => 3);
 
 my proto sub handle ($node, Context $context = None) is export {
 	{*}
@@ -144,14 +144,14 @@ multi sub handle (Pod::Block::Named $node where $node.name eq 'SUBTITLE') is exp
 }
 
 multi sub handle (Pod::Block::Named $node where $node.name eq 'Html') is export {
-	$node.contents>>.&handle();
+	$node.contents>>.&handle(HTML);
 }
 
 multi sub handle (Pod::Block::Para $node, $context = None) is export {
 	'<p>' ~ $node.contents>>.&handle($context) ~ '</p>' ~ NL;
 }
 
-multi sub handle (Pod::Block::Para $node, $context where * == Heading ) is export {
+multi sub handle (Pod::Block::Para $node, $context where * != None) is export {
 	$node.contents>>.&handle($context);
 }
 
@@ -239,6 +239,10 @@ multi sub handle (Pod::Raw $node) is export {
 
 multi sub handle (Str $node, Context $context?) is export {
 	$node.subst('&', '&amp;', :g).subst('<', '&lt;', :g);
+}
+
+multi sub handle (Str $node, Context $context where * == HTML) is export {
+	$node.Str;
 }
 
 multi sub handle (Nil) is export {
