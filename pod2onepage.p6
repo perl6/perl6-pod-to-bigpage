@@ -7,12 +7,14 @@ PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_thread
 
 my &verbose = sub (|c) {};
 
-my $source-dir = '../../doc/doc/';
-my $cache-dir = 'tmp/';
+my $source-dir;
+my $cache-dir = './tmp/';
 
 my @toc;
 
-sub MAIN (:v(:verbose($v))) {
+sub MAIN (:v(:verbose($v)), :$source-path) {
+	$source-dir = $source-path // './doc/';
+dd $source-dir, $source-path;
 	&verbose = &note if $v;
 	setup();
 	set-foreign-toc(@toc);
