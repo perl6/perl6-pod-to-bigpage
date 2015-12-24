@@ -181,6 +181,10 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'C', $context where *
 	'C<' ~ $node.contents>>.&handle() ~ '>';
 }
 
+multi sub handle (Pod::FormattingCode $node where .type eq 'E', $context = None) is export {
+	$node.meta.fmt('&%s;').join 
+}
+
 multi sub handle (Pod::FormattingCode $node where .type eq 'L', $context = None) is export {
 	my $link-target = $node.meta;
 	qq{<a href="$link-target">} ~ $node.contents>>.&handle($context) ~ '</a>';
