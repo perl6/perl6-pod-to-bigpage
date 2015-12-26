@@ -13,13 +13,23 @@ my $cache-dir = './tmp/';
 
 my @toc;
 
+sub next-part-index () {
+	state $lock = Lock.new;
+	state $global-part-index = -1;
+	my $clone;
+	$lock.protect: {
+		$clone = ++$global-part-index;
+	}
+	$clone
+}
+
 sub MAIN (:v(:verbose($v)), :$source-path) {
 	$source-dir = $source-path // './doc/';
 	&verbose = &note if $v;
 	setup();
 	set-foreign-toc(@toc);
 	put compose-before-content;
-	put await do start { .&parse-pod-file } for sort find-pod-files $source-dir;
+	put await do start { .&parse-pod-file(next-part-index) } for sort find-pod-files $source-dir;
 	put compose-toc() ~ compose-after-content;
 }
 
@@ -30,7 +40,7 @@ sub find-pod-files ($dir) {
 	}
 }
 
-sub parse-pod-file ($f) {
+sub parse-pod-file ($f, $part-number) {
 	my $io = $f.IO;
 
 	# We have to deal with special chars in a files path (.. / case insensiblility on NTFS etc) to store it in a cache. Instead of fiddeling with those chars, we just turn the entire path into base64.
@@ -44,7 +54,7 @@ sub parse-pod-file ($f) {
 #	}else{
 		verbose "processing $f "; # as $cached-path";
 		my $pod = (EVAL ($io.slurp ~ "\n\$=pod"));
-		my $html = $pod>>.&handle();
+		my $html = $pod>>.&handle(part-number => $part-number);
 #		$cached-io.spurt($html);
 		return $html;
 #	}
