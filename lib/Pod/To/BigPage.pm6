@@ -153,7 +153,7 @@ multi sub handle (Pod::Block::Named $node where $node.name eq 'TITLE', :$part-nu
 #	die;
 	my $text = $node.contents[0].contents[0].Str;
 	my $anchor = register-toc-entry(0, $text, $toc-counter);
-	Q:c (<a name="t{$anchor}"><h1 class="title">{$anchor}{$text}</h1></a>) 
+	Q:c (<a name="t{$anchor}"><h1 class="title">{$anchor} {$text}</h1></a>) 
 }
 
 multi sub handle (Pod::Block::Named $node where $node.name eq 'SUBTITLE', :$part-number?, :$toc-counter?) is export {
