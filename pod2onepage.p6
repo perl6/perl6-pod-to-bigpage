@@ -54,7 +54,7 @@ sub parse-pod-file ($f, $part-number) {
 #	}else{
 		verbose "processing $f "; # as $cached-path";
 		my $pod = (EVAL ($io.slurp ~ "\n\$=pod"));
-		my $html = $pod>>.&handle(part-number => $part-number);
+		my $html = $pod>>.&handle(part-number => $part-number, toc-counter => TOC-Counter.new.set-part-number($part-number));
 #		$cached-io.spurt($html);
 		return $html;
 #	}
