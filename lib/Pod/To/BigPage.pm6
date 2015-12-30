@@ -214,9 +214,10 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'E', $context = None,
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'L', $context = None, :$part-number?, :$toc-counter?) is export {
 	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
-	my $link-target = $node.meta;
+	my $content = $node.contents>>.&handle($context);
+	my $link-target = $node.meta eqv [] | [""] ?? $content !! $node.meta;
 	$link-target = '#' ~ $part-number ~ '-' ~ $link-target.substr(1) if $link-target.substr(0,1) eq '#';
-	qq{<a href="$link-target"$class>} ~ $node.contents>>.&handle($context) ~ '</a>';
+	Q:c (<a href="{$link-target}"{$class}>{$content}</a>)
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'I', $context = None, :$part-number?, :$toc-counter?) is export {
