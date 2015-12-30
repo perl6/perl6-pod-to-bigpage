@@ -15,7 +15,7 @@ constant NL = "\n";
 
 class TOC-Counter is export { 
 	has Int @!counters is default(0);
-	method Str () { @!counters.join: '.' }
+	method Str () { @!counters>>.Str.join: '.' }
 	method inc ($level) { 
 		@!counters[$level - 1]++;
 		@!counters.splice($level);
@@ -125,7 +125,7 @@ method render ($pod:) is export {
 	compose-toc() ~ compose-after-content
 }
 
-my enum Context ( None => 0, Index => 1 , Heading => 2, HTML => 3);
+my enum Context ( None => 0, Index => 1 , Heading => 2, HTML => 3, Raw => 4);
 
 my proto sub handle ($node, Context $context = None, :$part-number?, :$toc-counter?) is export {
 	{*}
@@ -145,7 +145,7 @@ multi sub handle (Pod::Block::Declarator $node, :$part-number?, :$toc-counter?) 
 }
 
 multi sub handle (Pod::Block::Named $node, :$part-number?, :$toc-counter?) is export {
-	$node.contents>>.&handle(part-number => $part-number, toc-counter => $toc-counter);
+	$node.contents>>.&handle(:$part-number, :$toc-counter);
 }
 
 multi sub handle (Pod::Block::Named $node where $node.name eq 'TITLE', :$part-number?, :$toc-counter) is export {
@@ -167,7 +167,7 @@ multi sub handle (Pod::Block::Named $node where $node.name eq 'Html', :$part-num
 
 multi sub handle (Pod::Block::Para $node, $context = None, :$part-number?, :$toc-counter?) is export {
 	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
-	"<p$class>" ~ $node.contents>>.&handle($context) ~ '</p>' ~ NL;
+	"<p$class>" ~ $node.contents>>.&handle($context, :$part-number) ~ '</p>' ~ NL;
 }
 
 multi sub handle (Pod::Block::Para $node, $context where * != None, :$part-number?, :$toc-counter?) is export {
@@ -187,6 +187,10 @@ multi sub handle (Pod::Block::Table $node, :$part-number?, :$toc-counter?) is ex
 
 multi sub handle (Pod::Config $node, :$part-number?, :$toc-counter?) is export {
 	$node.contents>>.&handle();
+}
+
+multi sub handle (Pod::FormattingCode $node, $context where * == Raw, :$part-number?, :$toc-counter?) is export {
+	$node.contents>>.&handle($context);
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'B', $context = None, :$part-number?, :$toc-counter?) is export {
@@ -210,6 +214,7 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'E', $context = None,
 multi sub handle (Pod::FormattingCode $node where .type eq 'L', $context = None, :$part-number?, :$toc-counter?) is export {
 	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
 	my $link-target = $node.meta;
+	$link-target = '#' ~ $part-number ~ '-' ~ $link-target.substr(1) if $link-target.substr(0,1) eq '#';
 	qq{<a href="$link-target"$class>} ~ $node.contents>>.&handle($context) ~ '</a>';
 }
 
@@ -233,7 +238,6 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'Z', $context = None,
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context = None, :$part-number?, :$toc-counter?) is export {
 	my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
-	Q:c (<div class="marginale">{$node.contents>>.&handle($context)}</div>);
 	my $index-display= $node.contents>>.&handle($context).Str;
 	my $index-target = $node.meta;
 	my $anchor = register-index-entry($node.meta.flat);
@@ -249,10 +253,12 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context where *
 
 multi sub handle (Pod::Heading $node, :$part-number?, :$toc-counter) is export {
 	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
-my $l = $node.level;
+	my $l = $node.level;
 	my $text = $node.contents>>.&handle(Heading).Str;
+	my $raw-text = $node.contents>>.&handle(Raw).List.flat.join;
+	my $id = $part-number ~ '-' ~ $raw-text.subst(' ', '_', :g);
 	my $anchor = register-toc-entry($l, $text, $toc-counter);
-	Q:c (<a name="t{$anchor}"$class><h{$l}>{$anchor} {$text}</h{$l}></a>) ~ NL
+	Q:c (<a name="t{$anchor}"$class><h{$l} id="{$id}">{$anchor} {$text}</h{$l}></a>) ~ NL
 }
 
 multi sub handle (Pod::Item $node, :$part-number?, :$toc-counter?) is export {
