@@ -30,7 +30,8 @@ sub MAIN (:v(:verbose($v)), :$source-path) {
 	set-foreign-toc(@toc);
 	put compose-before-content;
 	put await do start { .&parse-pod-file(next-part-index) } for sort find-pod-files $source-dir;
-	put compose-toc() ~ compose-after-content;
+	# put do { .&parse-pod-file(next-part-index) } for sort find-pod-files $source-dir;
+put compose-toc() ~ compose-after-content;
 }
 
 sub find-pod-files ($dir) {
@@ -54,7 +55,7 @@ sub parse-pod-file ($f, $part-number) {
 #	}else{
 		verbose "processing $f "; # as $cached-path";
 		my $pod = (EVAL ($io.slurp ~ "\n\$=pod"));
-		my $html = $pod>>.&handle(part-number => $part-number, toc-counter => TOC-Counter.new.set-part-number($part-number));
+		my $html = $pod>>.&handle(part-number => $part-number, toc-counter => TOC-Counter.new.set-part-number($part-number), part-config => {:head1(:numbered(True)),:head2(:numbered(True)),:head3(:numbered(True)),:head4(:numbered(True))});
 #		$cached-io.spurt($html);
 		return $html;
 #	}
