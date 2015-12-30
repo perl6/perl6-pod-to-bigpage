@@ -13,5 +13,5 @@ Make one big pod file and have threads from a pool for each root node.
 
 Let it find the `*.pod` for you and have a thread per file.
 
-	perl6 -I ./lib/goes/here pod2onepage.p6 -v --source-path=./doc/ > tmp/html.html
+	THREADS=4 perl6 -I ./lib/goes/here pod2onepage.p6 -v --source-path=./doc/ > tmp/html.html
 
