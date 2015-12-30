@@ -1,5 +1,4 @@
 unit class Pod::To::BigPage;
-use fatal;
 
 PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => %*ENV<THREADS>.?Int // 2);
 
@@ -150,8 +149,6 @@ multi sub handle (Pod::Block::Named $node, :$part-number?, :$toc-counter?) is ex
 }
 
 multi sub handle (Pod::Block::Named $node where $node.name eq 'TITLE', :$part-number?, :$toc-counter) is export {
-#	note Backtrace.new.full;
-#	die;
 	my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
 	my $text = $node.contents[0].contents[0].Str;
 	my $anchor = register-toc-entry(0, $text, $toc-counter);
