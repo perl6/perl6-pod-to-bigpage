@@ -168,11 +168,11 @@ multi sub handle (Pod::Block::Named $node where $node.name eq 'Html', :$part-num
 
 multi sub handle (Pod::Block::Para $node, $context = None, :$part-number?, :$toc-counter?, :%part-config) is export {
 	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
-	"<p$class>" ~ $node.contents>>.&handle($context, :$part-number) ~ '</p>' ~ NL;
+	"<p$class>" ~ $node.contents>>.&handle($context, :$part-number).join('') ~ '</p>' ~ NL;
 }
 
 multi sub handle (Pod::Block::Para $node, $context where * != None, :$part-number?, :$toc-counter?) is export {
-	$node.contents>>.&handle($context);
+	$node.contents>>.&handle($context).join('');
 }
 
 multi sub handle (Pod::Block::Table $node, :$part-number?, :$toc-counter?, :%part-config?) is export {
@@ -192,7 +192,7 @@ multi sub handle (Pod::Config $node, :$part-number?, :$toc-counter?, :%part-conf
 }
 
 multi sub handle (Pod::FormattingCode $node, $context where * == Raw, :$part-number?, :$toc-counter?) is export {
-	$node.contents>>.&handle($context);
+	$node.contents>>.&handle($context).join('');
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'B', $context = None, :$part-number?, :$toc-counter?) is export {
@@ -202,11 +202,11 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'B', $context = None,
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'C', $context = None, :$part-number?, :$toc-counter?) is export {
 	my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
-	Q:c (<span class="code{$additional-class}">{$node.contents>>.&handle($context)} </span>);
+	Q:c (<span class="code{$additional-class}">{$node.contents>>.&handle($context).join('')}</span>);
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'C', $context where * ~~ Index = None, :$part-number?, :$toc-counter?) is export {
-	'C<' ~ $node.contents>>.&handle() ~ '>';
+	'C<' ~ $node.contents>>.&handle().join('') ~ '>';
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'E', $context = None, :$part-number?, :$toc-counter?) is export {
