@@ -234,6 +234,18 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'N', $context = None,
 multi sub handle (Pod::FormattingCode $node where .type eq 'P', $context = None, :$part-number?, :$toc-counter?) is export {
 	my $content = $node.contents>>.&handle($context);
 	my $link = $node.meta eqv [] | [""] ?? $content !! $node.meta;
+	
+	use LWP::Simple;
+	my $url = LWP::Simple.parse_url($link);
+	my $doc = LWP::Simple.get($link);
+
+	if $doc {
+		given $url[3].split('.')[*-1] {
+			when 'txt' { return '<pre>' ~ $doc.subst('<', '&lt;').subst('&', '&amp;'); }
+			when 'html' | 'xhtml' { return $doc }
+		} 
+	}
+
 	warn "did not inline $link";
 	qq{<a href="$link">$content</a>}
 }
