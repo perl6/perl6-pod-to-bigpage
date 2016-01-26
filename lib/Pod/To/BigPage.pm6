@@ -150,14 +150,14 @@ multi sub handle (Pod::Block::Named $node, :$part-number?, :$toc-counter?, :%par
 }
 
 multi sub handle (Pod::Block::Named $node where $node.name eq 'TITLE', :$part-number?, :$toc-counter, :%part-config) is export {
-	my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
+	my $additional-class = ($node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '').subst('"', '&quot;');
 	my $text = $node.contents[0].contents[0].Str;
 	my $anchor = register-toc-entry(0, $text, $toc-counter);
 	Q:c (<a name="t{$anchor}"><h1 class="title{$additional-class}">{$anchor} {$text}</h1></a>) 
 }
 
 multi sub handle (Pod::Block::Named $node where $node.name eq 'SUBTITLE', :$part-number?, :$toc-counter?, :%part-config) is export {
-	my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
+	my $additional-class = ($node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '').subst('"', '&quot;');
 	my $text = $node.contents[0].contents[0].Str;
 	Q:c (<p class="subtitle{$additional-class}">{$text}</p></a>) 
 }
@@ -167,7 +167,7 @@ multi sub handle (Pod::Block::Named $node where $node.name eq 'Html', :$part-num
 }
 
 multi sub handle (Pod::Block::Para $node, $context = None, :$part-number?, :$toc-counter?, :%part-config) is export {
-	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
+	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
 	"<p$class>" ~ $node.contents>>.&handle($context, :$part-number).join('') ~ '</p>' ~ NL;
 }
 
@@ -176,7 +176,7 @@ multi sub handle (Pod::Block::Para $node, $context where * != None, :$part-numbe
 }
 
 multi sub handle (Pod::Block::Table $node, :$part-number?, :$toc-counter?, :%part-config?) is export {
-	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
+	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
 	"<table$class>" ~ NL ~
 	($node.caption ?? '<caption>' ~ $node.caption.&handle() ~ '</caption>>' !! '' ) ~
 	($node.headers ?? '<tr>' ~ do for $node.headers -> $cell { '<th>' ~ $cell.&handle() ~ '</th>' } ~ '</tr>' ~ NL !! '' ) ~
@@ -196,12 +196,12 @@ multi sub handle (Pod::FormattingCode $node, $context where * == Raw, :$part-num
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'B', $context = None, :$part-number?, :$toc-counter?) is export {
-	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
+	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
 	"<b$class>" ~ $node.contents>>.&handle($context) ~ '</b>';
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'C', $context = None, :$part-number?, :$toc-counter?) is export {
-	my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
+	my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class>.subst('"', '&quot;') !! '';
 	Q:c (<span class="code{$additional-class}">{$node.contents>>.&handle($context).join('')}</span>);
 }
 
@@ -214,21 +214,21 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'E', $context = None,
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'L', $context = None, :$part-number?, :$toc-counter?) is export {
-	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
+	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
 	my $content = $node.contents>>.&handle($context);
 	my $link-target = $node.meta eqv [] | [""] ?? $content !! $node.meta;
 	$link-target = '#' ~ $part-number ~ '-' ~ $link-target.substr(1) if $link-target.substr(0,1) eq '#';
-	Q:c (<a href="{$link-target}"{$class}>{$content}</a>)
+	Q:c (<a href="{$link-target.subst('"', '&quot;')}"{$class}>{$content}</a>)
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'I', $context = None, :$part-number?, :$toc-counter?) is export {
-	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
+	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
 	"<i$class>" ~ $node.contents>>.&handle($context) ~ '</i>';
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'N', $context = None, :$part-number?, :$toc-counter?) is export {
-	my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
-	Q:c (<div class="marginale">{$node.contents>>.&handle($context)}</div>);
+	my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class>.subst('"', '&quot;') !! '';
+	Q:c (<div class="marginale{$additional-class}">{$node.contents>>.&handle($context)}</div>);
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'R', $context = None, :$part-number?, :$toc-counter?) is export {
@@ -240,7 +240,7 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'Z', $context = None,
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context = None, :$part-number?, :$toc-counter?) is export {
-	my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
+	my $additional-class = ($node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '').subst('"', '&quot;');
 	my $index-display= $node.contents>>.&handle($context).Str;
 	my $index-target = $node.meta;
 	my $anchor = register-index-entry($node.meta.flat);
@@ -255,22 +255,22 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context where *
 }
 
 multi sub handle (Pod::Heading $node, :$part-number?, :$toc-counter, :%part-config) is export {
-	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
+	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
 	my $l = $node.level;
 	my $text = $node.contents>>.&handle(Heading).Str;
 	my $raw-text = $node.contents>>.&handle(Raw).List.flat.join;
 	my $id = $part-number ~ '-' ~ $raw-text.subst(' ', '_', :g);
 	if $node.config<numbered> || %part-config{'head' ~ $node.level}<numbered>.?Int {
 		my $anchor = register-toc-entry($l, $text, $toc-counter);
-		return Q:c (<a name="t{$anchor}"{$class}><h{$l} id="{$id}">{$anchor} {$text}</h{$l}></a>) ~ NL
+		return Q:c (<a name="t{$anchor}"{$class}></a><h{$l} id="{$id}">{$anchor} {$text}</h{$l}>) ~ NL
 	} else {
 		my $anchor = register-toc-entry($l, $text, $toc-counter, :hide);	
-		return Q:c (<a name="t{$anchor}"{$class}><h{$l} id="{$id}">{$text}</h{$l}></a>) ~ NL
+		return Q:c (<a name="t{$anchor}"{$class}></a><h{$l} id="{$id}">{$text}</h{$l}>) ~ NL
 	}
 }
 
 multi sub handle (Pod::Item $node, :$part-number?, :$toc-counter?, :%part-config?) is export {
-	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class> ~ '"' !! '';
+	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
 	"<ul><li$class>" x $node.level ~ $node.contents>>.&handle() ~ '</li></ul>' x $node.level
 }
 
