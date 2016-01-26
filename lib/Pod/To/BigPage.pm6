@@ -231,16 +231,23 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'N', $context = None,
 	Q:c (<div class="marginale{$additional-class}">{$node.contents>>.&handle($context)}</div>);
 }
 
+multi sub handle (Pod::FormattingCode $node where .type eq 'P', $context = None, :$part-number?, :$toc-counter?) is export {
+	my $content = $node.contents>>.&handle($context);
+	my $link = $node.meta eqv [] | [""] ?? $content !! $node.meta;
+	warn "did not inline $link";
+	qq{<a href="$link">$content</a>}
+}
+
 multi sub handle (Pod::FormattingCode $node where .type eq 'R', $context = None, :$part-number?, :$toc-counter?) is export {
 	'<var class="replaceable">' ~ $node.contents>>.&handle($context) ~ '</var>'
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'Z', $context = None, :$part-number?, :$toc-counter?) is export {
-	'<!-- ' ~ $node.contents>>.&handle($context) ~ ' -->';
+	'<!-- ' ~ $node.contents>>.&handle($context) ~ ' -->'
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'V', $context = None, :$part-number?, :$toc-counter?) is export {
-	'' ~ $node.contents>>.&handle($context) ~ '';
+	'' ~ $node.contents>>.&handle($context) ~ ''
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context = None, :$part-number?, :$toc-counter?) is export {
