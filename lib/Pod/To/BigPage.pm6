@@ -232,11 +232,15 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'N', $context = None,
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'R', $context = None, :$part-number?, :$toc-counter?) is export {
-	'R<' ~ $node.contents>>.&handle($context) ~ '>';
+	'<var class="replaceable">' ~ $node.contents>>.&handle($context) ~ '</var>'
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'Z', $context = None, :$part-number?, :$toc-counter?) is export {
 	'<!-- ' ~ $node.contents>>.&handle($context) ~ ' -->';
+}
+
+multi sub handle (Pod::FormattingCode $node where .type eq 'V', $context = None, :$part-number?, :$toc-counter?) is export {
+	'' ~ $node.contents>>.&handle($context) ~ '';
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context = None, :$part-number?, :$toc-counter?) is export {
