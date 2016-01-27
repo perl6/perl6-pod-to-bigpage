@@ -60,7 +60,7 @@ sub setup () is export {
 			ul.toc li.toc-level-9 { padding-left: 1em; }
 			ul.toc li.toc-level-10{ padding-left: 1em; }
 			#toc { width: 20em; margin-left: -22em; float: left; position: fixed; top: 0; overflow: scroll; height: 100%; padding: 0; white-space: nowrap; }
-			.code { font-family: monospace; background-color: #c0c0c0; margin-right: 0em; }
+			.code { font-family: monospace; background-color: #c0c0c0; }
 		</style>
 		<link href="pod-to-bigpage.css" rel="stylesheet" type="text/css" />
 		EOH
