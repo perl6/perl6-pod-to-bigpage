@@ -59,7 +59,8 @@ sub setup () is export {
 			ul.toc li.toc-level-8 { padding-left: 1em; }
 			ul.toc li.toc-level-9 { padding-left: 1em; }
 			ul.toc li.toc-level-10{ padding-left: 1em; }
-			#toc { width: 20em; margin-left: -22em; float: left; position: fixed; top: 0; overflow: scroll; height: 100%; padding: 0; white-space: nowrap; }
+			#left-side-menu { width: 20em; margin-left: -22em; float: left; position: fixed; top: 0; overflow: scroll; height: 100%; padding: 0; white-space: nowrap; }
+			#left-side-menu span.selection { padding-left: 1em; padding-right: 1em; }
 			.code { font-family: monospace; background-color: #c0c0c0; }
 		</style>
 		<link href="pod-to-bigpage.css" rel="stylesheet" type="text/css" />
@@ -72,15 +73,19 @@ sub set-foreign-toc (\toc) is export {
 	@toc := toc;
 }
 
-sub register-index-entry(*@a) {
+sub set-foreign-index (\index) is export {
+	%register := index;
+}
+
+sub register-index-entry(@meta, @content) {
 	state $lock = Lock.new;
 	state $global-index-counter;
 	my $clone;
 	$lock.protect: {
-		$clone = ++$global-index-counter;
-		%register{@a} = $clone xx *;
+		$clone = (++$global-index-counter).Str;
+		%register{.Str}.push($clone) for @meta;
 	}
-	'r' ~ $clone
+	'i' ~ $clone
 }
 
 sub register-toc-entry($level, $text, $part-toc-counter, :$hide) {
@@ -100,6 +105,20 @@ sub compose-toc (:$toc = @toc) is export {
 		.sort({$_.key.subst(/(\d+)/, -> $/ { 0 ~ $0.chars.chr ~ $0 }, :g)})\
 		.map({ Q:c (<a href="#t{$_.key}"><li class="toc-level toc-level-{$_.value.value}"><span class="toc-number">{$_.key}</span> {$_.value.key}</li></a>) }).join(NL) ~
 	'</ul></div>'
+}
+
+sub compose-index (:$register = %register) is export {
+	'<div id="index"><ul class="index">' ~ NL ~
+	$register.sort.map({ 
+		'<li>' ~ .key.Str ~ '&emsp;' ~ .value.map({ '<a href="#i' ~ .Str ~ '">' ~ .Str ~ '</a>' }) ~ '</li>' 
+	}) ~
+	'</ul></div>'
+}
+
+sub compose-left-side-menu () is export {
+	'<div id="left-side-menu"><a href="#toc"><span class="selection">TOC</span></a><a href="#index"><span class="selection">Index</span></a>' ~
+	compose-toc() ~ compose-index() ~
+	'</div>'
 }
 
 sub compose-before-content () is export {
@@ -273,17 +292,15 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'V', $context = None,
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context = None, :$part-number?, :$toc-counter?) is export {
 	my $additional-class = ($node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '').subst('"', '&quot;');
-	my $index-display= $node.contents>>.&handle($context).Str;
-	my $index-target = $node.meta;
-	my $anchor = register-index-entry($node.meta.flat);
+	my $index-display = $node.contents>>.&handle($context).Str;
+	my $anchor = register-index-entry($node.meta, $node.contents);
 	Q:c (<span class="indexed$additional-class"><a name="{$anchor}">{$index-display}</a></span>);
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context where * == Heading, :$part-number?, :$toc-counter?) is export {
-	my $index-display= $node.contents>>.&handle($context).Str;
-	my $index-target = $node.meta;
-	my $anchor = register-index-entry($node.meta.flat);
-	$index-display
+	my $index-display = $node.contents>>.&handle($context).Str;
+	my $anchor = register-index-entry($node.meta, $node.contents);
+	q:c (<a name="{$anchor}"></a>{$index-display})
 }
 
 multi sub handle (Pod::Heading $node, :$part-number?, :$toc-counter, :%part-config) is export {

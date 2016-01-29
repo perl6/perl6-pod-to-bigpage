@@ -18,7 +18,7 @@ sub next-part-index () {
 	state $global-part-index = -1;
 	my $clone;
 	$lock.protect: {
-		$clone = ++$global-part-index;
+		$clone = $global-part-index++;
 	}
 	$clone
 }
@@ -31,7 +31,7 @@ sub MAIN (:v(:verbose($v)), :$source-path) {
 	put compose-before-content;
 	put await do start { .&parse-pod-file(next-part-index) } for sort find-pod-files $source-dir;
 	# put do { .&parse-pod-file(next-part-index) } for sort find-pod-files $source-dir;
-put compose-toc() ~ compose-after-content;
+	put compose-left-side-menu() ~ compose-after-content();
 }
 
 sub find-pod-files ($dir) {
