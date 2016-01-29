@@ -60,8 +60,17 @@ sub setup () is export {
 			ul.toc li.toc-level-9 { padding-left: 1em; }
 			ul.toc li.toc-level-10{ padding-left: 1em; }
 			#left-side-menu { width: 20em; margin-left: -22em; float: left; position: fixed; top: 0; overflow: scroll; height: 100%; padding: 0; white-space: nowrap; }
-			#left-side-menu span.selection { padding-left: 1em; padding-right: 1em; }
-			.code { font-family: monospace; background-color: #c0c0c0; }
+			#left-side-menu-header { 
+				transform: rotate(90deg); 
+				transform-origin: left bottom 0;
+				z-index: 1;
+				position: fixed;
+				float: left;
+				top: 0;
+				margin-left: -23.5em;
+			}
+			#left-side-menu-header span.selection { padding-left: 1em; padding-right: 1em; }
+			.code { font-family: monospace; background-color: #f9f9f9; }
 		</style>
 		<link href="pod-to-bigpage.css" rel="stylesheet" type="text/css" />
 		EOH
@@ -116,7 +125,7 @@ sub compose-index (:$register = %register) is export {
 }
 
 sub compose-left-side-menu () is export {
-	'<div id="left-side-menu"><a href="#toc"><span class="selection">TOC</span></a><a href="#index"><span class="selection">Index</span></a>' ~
+	'<div id="left-side-menu-header"><a href="#toc"><span class="selection">TOC</span></a><a href="#index"><span class="selection">Index</span></a></div><div id="left-side-menu">' ~
 	compose-toc() ~ compose-index() ~
 	'</div>'
 }
