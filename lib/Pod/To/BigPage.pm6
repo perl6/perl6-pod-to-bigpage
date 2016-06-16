@@ -332,6 +332,18 @@ multi sub handle (Pod::Item $node, :$part-number?, :$toc-counter?, :%part-config
 	"<ul><li$class>" x $node.level ~ $node.contents>>.&handle() ~ '</li></ul>' x $node.level
 }
 
+my %list-item-counter is default(0);
+
+multi sub handle (Pod::Item $node where $node.config<:numbered>, :$part-number, :$toc-counter?, :%part-config?) is export {
+	%list-item-counter = () if %list-item-counter{$node.level}:exists && %list-item-counter.keys.max > $node.level; 
+	%list-item-counter{$node.level}++;
+	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
+	%list-item-counter.keys.sort.map({ "<ul><li$class><span class=\"numbered-prefix\">{%list-item-counter{$_} ~ (%list-item-counter{$_+1}:exists ?? '.' !! '') }</span>"}) 
+	~ $node.contents>>.&handle()
+	~ "</li></ul>" x %list-item-counter.keys.elems
+	~ NL;
+}
+
 multi sub handle (Pod::Raw $node, :$part-number?, :$toc-counter?) is export {
 	$node.contents>>.&handle()
 }
