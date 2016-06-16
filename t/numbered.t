@@ -19,6 +19,9 @@ Vidi
 Vici
 
 =for item1 :numbered
+Wxtra
+
+=for item1 :numbered
 Wisito
 
 =for item2 :numbered
@@ -31,5 +34,7 @@ Widi
 Wici
 
 =end pod
+
+dd $=pod;
 
 put $=pod>>.&handle(part-number => 1);
