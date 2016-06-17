@@ -23,7 +23,10 @@ sub next-part-index () {
 	$clone
 }
 
-sub MAIN (:v(:verbose($v)), :$source-path) {
+my @exclude;
+
+sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude) {
+	@exclude = $exclude.split: ',';
 	$source-dir = $source-path // './doc/';
 	&verbose = &note if $v;
 	setup();
@@ -36,7 +39,7 @@ sub MAIN (:v(:verbose($v)), :$source-path) {
 
 sub find-pod-files ($dir) {
 	gather for dir($dir) {
-		take .Str if .extension ~~ rx:i/pod$/;
+		take .Str if .Str !(elem) @exclude && .extension ~~ rx:i/pod$/;
 		take slip sort find-pod-files $_ if .d;
 	}
 }
