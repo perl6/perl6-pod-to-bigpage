@@ -118,7 +118,7 @@ sub compose-toc (:$toc = @toc) is export {
 
 sub compose-index (:$register = %register) is export {
 	'<div id="index"><ul class="index">' ~ NL ~
-	$register.sort.map({ 
+	$register.sort(*.key.lc).map({ 
 		'<li>' ~ .key.Str ~ '&emsp;' ~ .value.map({ '<a href="#i' ~ .Str ~ '">' ~ .Str ~ '</a>' }) ~ '</li>' 
 	}) ~
 	'</ul></div>'
