@@ -303,7 +303,7 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context = None,
 	my $additional-class = ($node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '').subst('"', '&quot;');
 	my $index-display = $node.contents>>.&handle($context).Str;
 	my $anchor = register-index-entry($node.meta, $node.contents);
-	Q:c (<span class="indexed{$additional-class}"><a name="{$anchor}">{$index-display}</a></span>);
+	Q:c (<span class="indexed{$additional-class}"><a id="{$anchor}" name="{$node.meta}">{$index-display}</a></span>);
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context where * == Heading, :$part-number?, :$toc-counter?) is export {
