@@ -344,7 +344,7 @@ multi sub handle (Pod::Item $node, :$part-number?, :$toc-counter?, :%part-config
 	"<ul><li$class>" x $node.level ~ $node.contents>>.&handle() ~ '</li></ul>' x $node.level
 }
 
-multi sub handle (Pod::Item $node where $node.config<:numbered>, :$part-number, :$toc-counter?, :%part-config?) is export {
+multi sub handle (Pod::Item $node where so $node.config<:numbered>, :$part-number, :$toc-counter?, :%part-config?) is export {
 	%list-item-counter = () if %list-item-counter{$node.level}:exists && %list-item-counter.keys.max > $node.level || $last-part-number != $part-number; 
 	%list-item-counter{$node.level}++;
 	$last-part-number = $part-number;
