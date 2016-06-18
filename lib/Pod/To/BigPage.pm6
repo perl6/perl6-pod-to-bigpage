@@ -71,6 +71,15 @@ sub setup () is export {
 			}
 			#left-side-menu-header span.selection { padding-left: 1em; padding-right: 1em; }
 			.code { font-family: monospace; background-color: #f9f9f9; }
+			ul.numbered {
+				list-style: none;
+			}
+			span.numbered-prefix {
+				float: left;
+			}
+			span.numbered-prefix::after {
+				content: ")\00a0";
+			}
 		</style>
 		<link href="pod-to-bigpage.css" rel="stylesheet" type="text/css" />
 		EOH
@@ -340,7 +349,7 @@ multi sub handle (Pod::Item $node where $node.config<:numbered>, :$part-number, 
 	%list-item-counter{$node.level}++;
 	$last-part-number = $part-number;
 	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
-	%list-item-counter.keys.sort.map({ "<ul><li$class><span class=\"numbered-prefix\">{%list-item-counter{$_} ~ (%list-item-counter{$_+1}:exists ?? '.' !! '') }</span>"}) 
+	%list-item-counter.keys.sort.map({ "<ul class=\"numbered\"><li$class><span class=\"numbered-prefix\">{%list-item-counter{$_} ~ (%list-item-counter{$_+1}:exists ?? '.' !! '') }</span>"}) 
 	~ $node.contents>>.&handle()
 	~ "</li></ul>" x %list-item-counter.keys.elems + 1
 	~ NL;
