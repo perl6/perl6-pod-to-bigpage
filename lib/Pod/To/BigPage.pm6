@@ -155,6 +155,8 @@ method render ($pod:) is export {
 }
 
 my enum Context ( None => 0, Index => 1 , Heading => 2, HTML => 3, Raw => 4);
+my %list-item-counter is default(0);
+my $last-part-number= -1;
 
 my proto sub handle ($node, Context $context = None, :$part-number?, :$toc-counter?, :%part-config?) is export {
 	{*}
@@ -313,6 +315,7 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context where *
 }
 
 multi sub handle (Pod::Heading $node, :$part-number?, :$toc-counter, :%part-config) is export {
+	%list-item-counter = ();
 	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
 	my $l = $node.level;
 	my $text = $node.contents>>.&handle(Heading).Str;
@@ -332,15 +335,14 @@ multi sub handle (Pod::Item $node, :$part-number?, :$toc-counter?, :%part-config
 	"<ul><li$class>" x $node.level ~ $node.contents>>.&handle() ~ '</li></ul>' x $node.level
 }
 
-my %list-item-counter is default(0);
-
 multi sub handle (Pod::Item $node where $node.config<:numbered>, :$part-number, :$toc-counter?, :%part-config?) is export {
-	%list-item-counter = () if %list-item-counter{$node.level}:exists && %list-item-counter.keys.max > $node.level; 
+	%list-item-counter = () if %list-item-counter{$node.level}:exists && %list-item-counter.keys.max > $node.level || $last-part-number != $part-number; 
 	%list-item-counter{$node.level}++;
+	$last-part-number = $part-number;
 	my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
 	%list-item-counter.keys.sort.map({ "<ul><li$class><span class=\"numbered-prefix\">{%list-item-counter{$_} ~ (%list-item-counter{$_+1}:exists ?? '.' !! '') }</span>"}) 
 	~ $node.contents>>.&handle()
-	~ "</li></ul>" x %list-item-counter.keys.elems
+	~ "</li></ul>" x %list-item-counter.keys.elems + 1
 	~ NL;
 }
 
