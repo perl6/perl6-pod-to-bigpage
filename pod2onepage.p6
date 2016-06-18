@@ -39,7 +39,7 @@ sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude) {
 
 sub find-pod-files ($dir) {
 	gather for dir($dir) {
-		take .Str if .Str !(elem) @exclude && .extension ~~ rx:i/pod$/;
+		take .Str if .Str.split('/')[*-1] !(elem) @exclude && .extension ~~ rx:i/pod$/;
 		take slip sort find-pod-files $_ if .d;
 	}
 }
