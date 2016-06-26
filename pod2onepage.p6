@@ -39,7 +39,7 @@ sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude) {
 
 sub find-pod-files ($dir) {
 	gather for dir($dir) {
-		take .Str if .Str.split('/')[*-1] !(elem) @exclude && .extension ~~ rx:i/pod$/;
+		take .Str if .Str.ends-with(none @exclude) && .extension ~~ rx:i/pod$/;
 		take slip sort find-pod-files $_ if .d;
 	}
 }
@@ -47,19 +47,28 @@ sub find-pod-files ($dir) {
 sub parse-pod-file ($f, $part-number) {
 	my $io = $f.IO;
 
-	# We have to deal with special chars in a files path (.. / case insensiblility on NTFS etc) to store it in a cache. Instead of fiddeling with those chars, we just turn the entire path into base64.
+	my $pod; 
+	{
+		use nqp;
+		my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => ((%*ENV<TEMP> // '/tmp') ~ '/PodToBigfile-precomp').IO );
+		my $precomp = CompUnit::PrecompilationRepository::Default.new(store => $precomp-store);
 
-#	my $cached-path = $cache-dir ~ encode-base64($f, :str);
-#	my $cached-io = $cached-path.IO;
+		$pod = (EVAL ($io.slurp ~ "\n\$=pod"));
+		
+		my $id = nqp::sha1($f);
+		my $handle = $precomp.load($id,:since($f.IO.modified))[0];
 
-#	if $cached-io.e && $cached-io.modified >= $io.modified {
-#		verbose "cached $f as $cached-path";
-#		return $cached-io.slurp;
-#	}else{
-		verbose "processing $f "; # as $cached-path";
-		my $pod = (EVAL ($io.slurp ~ "\n\$=pod"));
-		my $html = $pod>>.&handle(part-number => $part-number, toc-counter => TOC-Counter.new.set-part-number($part-number), part-config => {:head1(:numbered(True)),:head2(:numbered(True)),:head3(:numbered(True)),:head4(:numbered(True))});
-#		$cached-io.spurt($html);
-		return $html;
-#	}
+		my $cached = "(cached)";
+
+		if not $handle {
+			$precomp.precompile($f.IO, $id);
+			$handle = $precomp.load($id)[0];
+			$cached = "";
+		}
+	
+		verbose "processed $f $cached";
+		$pod = nqp::atkey($handle.unit,'$=pod')[0];
+	}	
+	my $html = $pod>>.&handle(part-number => $part-number, toc-counter => TOC-Counter.new.set-part-number($part-number), part-config => {:head1(:numbered(True)),:head2(:numbered(True)),:head3(:numbered(True)),:head4(:numbered(True))});
+	return $html;
 }
