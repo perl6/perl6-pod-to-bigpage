@@ -10,6 +10,7 @@ my &verbose = sub (|c) {};
 
 my $source-dir;
 my $cache-dir = './tmp/';
+my Bool $disable-cache;
 
 my @toc;
 
@@ -25,10 +26,11 @@ sub next-part-index () {
 
 my @exclude;
 
-sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude) {
+sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = False) {
 	@exclude = $exclude.split: ',';
 	$source-dir = $source-path // './doc/';
 	&verbose = &note if $v;
+	$disable-cache = $no-cache;
 	setup();
 	set-foreign-toc(@toc);
 	put compose-before-content;
@@ -44,19 +46,20 @@ sub find-pod-files ($dir) {
 	}
 }
 
+my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => ((%*ENV<TEMP> // '/tmp') ~ '/PodToBigfile-precomp').IO );
+my $precomp = CompUnit::PrecompilationRepository::Default.new(store => $precomp-store);
+
 sub parse-pod-file ($f, $part-number) {
 	my $io = $f.IO;
 
 	my $pod; 
-	{
+	if $disable-cache {
+		$pod = (EVAL ($io.slurp ~ "\n\$=pod"));
+		verbose "processed $f";
+	}else{
 		use nqp;
-		my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => ((%*ENV<TEMP> // '/tmp') ~ '/PodToBigfile-precomp').IO );
-		my $precomp = CompUnit::PrecompilationRepository::Default.new(store => $precomp-store);
-
-		# $pod = (EVAL ($io.slurp ~ "\n\$=pod"));
-		
 		my $id = nqp::sha1($f);
-		my $handle = $precomp.load($id,:since($f.IO.modified))[0];
+		my $handle = $precomp.load($id, :since($f.IO.modified))[0];
 
 		my $cached = "(cached)";
 
