@@ -53,7 +53,7 @@ sub parse-pod-file ($f, $part-number) {
 		my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => ((%*ENV<TEMP> // '/tmp') ~ '/PodToBigfile-precomp').IO );
 		my $precomp = CompUnit::PrecompilationRepository::Default.new(store => $precomp-store);
 
-		$pod = (EVAL ($io.slurp ~ "\n\$=pod"));
+		# $pod = (EVAL ($io.slurp ~ "\n\$=pod"));
 		
 		my $id = nqp::sha1($f);
 		my $handle = $precomp.load($id,:since($f.IO.modified))[0];
