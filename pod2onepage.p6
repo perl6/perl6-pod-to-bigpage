@@ -4,7 +4,6 @@ use Base64;
 use Pod::To::BigPage;
 use MONKEY-SEE-NO-EVAL;
 
-PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => %*ENV<THREADS>.?Int // 2);
 
 my &verbose = sub (|c) {};
 
@@ -26,11 +25,14 @@ sub next-part-index () {
 
 my @exclude;
 
-sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = False) {
+sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = False, :$threads = %*ENV<THREADS>.?Int // 2) {
 	@exclude = $exclude.split: ',';
 	$source-dir = $source-path // './doc/';
 	&verbose = &note if $v;
 	$disable-cache = $no-cache;
+    
+	PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
+	
 	setup();
 	set-foreign-toc(@toc);
 	put compose-before-content;
