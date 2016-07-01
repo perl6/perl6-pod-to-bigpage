@@ -42,9 +42,10 @@ sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = 
 }
 
 sub find-pod-files ($dir) {
+    state $none-exclude = @exclude.none;
 	gather for dir($dir) {
-		take .Str if .Str.ends-with(none @exclude) && .extension ~~ rx:i/pod6$/;
-		take slip sort find-pod-files $_ if .d;
+		take .Str if .Str.ends-with($none-exclude) && .extension ~~ rx:i/pod6$/;
+		take slip sort find-pod-files $_ if .d && .Str.ends-with($none-exclude);
 	}
 }
 
