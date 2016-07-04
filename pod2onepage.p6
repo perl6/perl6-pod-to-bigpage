@@ -61,14 +61,14 @@ sub parse-pod-file ($f, $part-number) {
 		verbose "processed $f";
 	}else{
 		use nqp;
-		my $id = nqp::sha1($f);
-		my $handle = $precomp.load($id, :since($f.IO.modified))[0];
+		my $id = nqp::sha1(~$f);
+		my $handle = $precomp.load($id, :since($io.modified))[0];
 
 		my $cached = "(cached)";
 
-		if not $handle {
-			$precomp.precompile($f.IO, $id);
-			$handle = $precomp.load($id)[0];
+		without $handle {
+			$precomp.precompile($io, $id, :force);
+			$handle = $precomp.load($id)[0] // fail("Could not precompile $f");
 			$cached = "";
 		}
 	
