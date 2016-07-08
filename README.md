@@ -6,12 +6,7 @@ It's ment as a tool to check many POD files in a more or less convenient way. It
 
 # SYNOPSIS
 
-Make one big pod file and have threads from a pool for each root node.
-
-    find doc/ -iname '*.pod' | xargs -n 1 cat >> big-podfile.pod
-    THREADS=4 perl6 --doc=BigPage -I ./lib/goes/here big-podfile.pod > your-html.html
-
 Let it find the `*.pod` for you and have a thread per file.
 
-	THREADS=4 perl6 -I ./lib/goes/here pod2onepage.p6 -v --source-path=./doc/ > tmp/html.html
+    THREADS=2 perl6 -I ./lib pod2onepage.p6 -v --source-path=../../perl6-doc/ --exclude=404.pod6,/.git,/precompiled > tmp/html.html
 
