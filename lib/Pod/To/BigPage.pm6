@@ -35,6 +35,7 @@ sub setup () is export {
         <style type="text/css">
             body { margin-left: 4em; margin-right: 4em; }
             div.pod-content { padding-left: 20em; }
+            div.pod-body { width: 60em }
             div.marginale { float: right; margin-right: -4em; width: 18em; font-size: 66%; text-align: left; }
             span.filename { font-family: monospace; font-stretch: condensed; }
             h1.title { font-size: 200%; }
@@ -143,13 +144,13 @@ sub compose-left-side-menu () is export {
 }
 
 sub compose-before-content () is export {
-    '<?xml version="1.0" encoding="utf-8" ?>' ~
-    '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' ~
-    '<html xmlns="http://www.w3.org/1999/xhtml">' ~
-    '<head>' ~
-    ('  ' xx *) Z $html-header.split("\n") ~
-    '</head>' ~
-    qq{<body>$html-before-content\n  <div class="pod-content">} 
+    '<?xml version="1.0" encoding="utf-8" ?>' ~ NL ~
+    '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' ~ NL ~
+    '<html xmlns="http://www.w3.org/1999/xhtml">' ~ NL ~
+    '<head>' ~ NL ~
+    $html-header ~ NL ~
+    '</head>' ~ NL ~
+    qq{<body>$html-before-content\n  <div class="pod-content">} ~ NL
 }
 
 sub compose-after-content () is export {
@@ -158,11 +159,10 @@ sub compose-after-content () is export {
 }
 
 method render ($pod:) is export {
-#   return '' if $++;
     setup();
     
     compose-before-content ~
-    await do start { handle($_) } for $pod.flat ~
+    '<div class="pod-body">' ~ await do start { handle($_) } for $pod.flat ~ '</div>' ~
     compose-toc() ~ compose-after-content
 }
 
@@ -205,7 +205,7 @@ multi sub handle (Pod::Block::Named $node where $node.name eq 'SUBTITLE', :$part
 }
 
 multi sub handle (Pod::Block::Named $node where $node.name eq 'Html', :$part-number?, :$toc-counter?, :%part-config) is export {
-    $node.contents>>.&handle(HTML);
+    $node.contents>>.&handle(HTML) ~ NL;
 }
 
 multi sub handle (Pod::Block::Para $node, $context = None, :$part-number?, :$toc-counter?, :%part-config) is export {
