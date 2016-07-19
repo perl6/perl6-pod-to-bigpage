@@ -132,7 +132,7 @@ sub compose-index (:$register = %register) is export {
     note "found duplicate index entry {.key} at {.value.map: {'#i' ~ .Str}}" for @dupes;
     '<div id="index"><ul class="index">' ~ NL ~
     $register.sort(*.key.lc).map({ 
-        '<li>' ~ .key.Str ~ '&emsp;' ~ .value.map({ '<a href="#i' ~ .Str ~ '">' ~ .Str ~ '</a>' }) ~ '</li>' 
+        '<li>' ~ .key.Str.subst('&', '&amp;', :g).subst('<', '&lt;', :g).subst('>', '&gt;', :g) ~ '&emsp;' ~ .value.map({ '<a href="#i' ~ .Str ~ '">' ~ .Str ~ '</a>' }) ~ '</li>' 
     }) ~
     '</ul></div>'
 }
@@ -162,7 +162,7 @@ method render ($pod:) is export {
     setup();
     
     compose-before-content ~
-    '<div class="pod-body">' ~ await do start { handle($_) } for $pod.flat ~ '</div>' ~
+    await do start { handle($_) } for $pod.flat ~
     compose-toc() ~ compose-after-content
 }
 
@@ -176,7 +176,7 @@ my proto sub handle ($node, Context $context = None, :$part-number?, :$toc-count
 
 multi sub handle (Pod::Block::Code $node, :$part-number?, :$toc-counter?, :%part-config?) is export {
     my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
-    Q:c (<pre class="code{$additional-class}">{$node.contents>>.&handle()}</pre>) ~ NL;
+    Q:c (<pre class="code{$additional-class}">{$node.contents>>.&handle().subst('&', '&amp;', :g).subst('<', '&lt;', :g).subst('>', '&gt;', :g)}</pre>) ~ NL;
 }
 
 multi sub handle (Pod::Block::Comment $node, :$part-number?, :$toc-counter?, :%part-config?) is export {
@@ -265,7 +265,7 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'L', $context = None,
     my $content = $node.contents>>.&handle($context);
     my $link-target = $node.meta eqv [] | [""] ?? $content !! $node.meta;
     $link-target = '#' ~ $part-number ~ '-' ~ $link-target.substr(1) if $link-target.substr(0,1) eq '#';
-    Q:c (<a href="{$link-target.subst('"', '&quot;')}"{$class}>{$content}</a>)
+    Q:c (<a href="{$link-target.subst('&', '&amp;', :g).subst('"', '&quot;', :g).subst('<', '&lt;', :g).subst('>', '&gt;', :g)}"{$class}>{$content}</a>)
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'I', $context = None, :$part-number?, :$toc-counter?) is export {
@@ -321,8 +321,9 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'V', $context = None,
 multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context = None, :$part-number?, :$toc-counter?) is export {
     my $additional-class = ($node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '').subst('"', '&quot;');
     my $index-display = $node.contents>>.&handle($context).Str;
-    my $anchor = register-index-entry($node.meta, $node.contents);
-    Q:c (<span class="indexed{$additional-class}"><a id="{$anchor}" name="{$node.meta}">{$index-display}</a></span>);
+    my @name = $node.meta>>.subst('&', '&amp;', :g).subst('"', '&quot;', :g).subst('<', '&lt;', :g).subst('>', '&gt;', :g);
+    my $anchor = register-index-entry(@name, $node.contents);
+    Q:c (<span class="indexed{$additional-class}"><a id="{$anchor}" name="{@name}">{$index-display}</a></span>);
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context where * == Heading, :$part-number?, :$toc-counter?) is export {
@@ -337,7 +338,7 @@ multi sub handle (Pod::Heading $node, :$part-number?, :$toc-counter, :%part-conf
     my $l = $node.level;
     my $text = $node.contents>>.&handle(Heading).Str;
     my $raw-text = $node.contents>>.&handle(Raw).List.flat.join;
-    my $id = $part-number ~ '-' ~ $raw-text.subst(' ', '_', :g);
+    my $id = $part-number ~ '-' ~ $raw-text.subst(' ', '_', :g).subst('"','&quot;', :g);
     if $node.config<numbered> || %part-config{'head' ~ $node.level}<numbered>.?Int {
         my $anchor = register-toc-entry($l, $text, $toc-counter);
         return Q:c (<a name="t{$anchor}"{$class}></a><h{$l} id="{$id}">{$anchor} {$text}</h{$l}>) ~ NL
