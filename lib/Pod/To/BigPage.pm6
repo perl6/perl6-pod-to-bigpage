@@ -201,7 +201,7 @@ multi sub handle (Pod::Block::Named $node where $node.name eq 'TITLE', :$part-nu
 multi sub handle (Pod::Block::Named $node where $node.name eq 'SUBTITLE', :$part-number?, :$toc-counter?, :%part-config) is export {
     my $additional-class = ($node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '').subst('"', '&quot;');
     my $text = $node.contents[0].contents[0].Str;
-    Q:c (<p class="subtitle{$additional-class}">{$text}</p></a>) 
+    Q:c (<p class="subtitle{$additional-class}">{$text}</p>) 
 }
 
 multi sub handle (Pod::Block::Named $node where $node.name eq 'Html', :$part-number?, :$toc-counter?, :%part-config) is export {
