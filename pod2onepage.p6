@@ -76,5 +76,5 @@ sub parse-pod-file ($f, $part-number) {
         $pod = nqp::atkey($handle.unit,'$=pod')[0];
     }   
     my $html = $pod>>.&handle(part-number => $part-number, toc-counter => TOC-Counter.new.set-part-number($part-number), part-config => {:head1(:numbered(True)),:head2(:numbered(True)),:head3(:numbered(True)),:head4(:numbered(True))});
-    return Q:c[<div class="pod-body">{$html}</div>];
+    return Q:c[<div class="pod-body"><a id="{$f.subst('/', '_', :g)}"></a>{$html}</div>];
 }
