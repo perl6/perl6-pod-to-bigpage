@@ -1,9 +1,7 @@
 use v6;
 
-use Base64;
 use Pod::To::BigPage;
 use MONKEY-SEE-NO-EVAL;
-
 
 my &verbose = sub (|c) {};
 
@@ -16,6 +14,7 @@ my @toc;
 sub next-part-index () {
     state $lock = Lock.new;
     state $global-part-index = -1;
+
     my $clone;
     $lock.protect: {
         $clone = $global-part-index++;
@@ -36,8 +35,8 @@ sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = 
     setup();
     set-foreign-toc(@toc);
     put compose-before-content;
-    put await do start { .&parse-pod-file(next-part-index) } for sort find-pod-files $source-dir;
-    # put do { .&parse-pod-file(next-part-index) } for sort find-pod-files $source-dir;
+    # put await do start { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-dir;
+    put do { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-dir;
     put compose-left-side-menu() ~ compose-after-content();
 }
 
@@ -52,10 +51,11 @@ sub find-pod-files ($dir) {
 my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => ((%*ENV<TEMP> // '/tmp') ~ '/PodToBigfile-precomp').IO );
 my $precomp = CompUnit::PrecompilationRepository::Default.new(store => $precomp-store);
 
-sub parse-pod-file ($f, $part-number) {
+sub parse-pod-file ($f, $part-number, $pod-name is copy) {
     my $io = $f.IO;
 
     my $pod; 
+
     if $disable-cache {
         $pod = (EVAL ($io.slurp ~ "\n\$=pod"));
         verbose "processed $f";
@@ -75,6 +75,8 @@ sub parse-pod-file ($f, $part-number) {
         verbose "processed $f $cached";
         $pod = nqp::atkey($handle.unit,'$=pod')[0];
     }   
-    my $html = $pod>>.&handle(part-number => $part-number, toc-counter => TOC-Counter.new.set-part-number($part-number), part-config => {:head1(:numbered(True)),:head2(:numbered(True)),:head3(:numbered(True)),:head4(:numbered(True))});
-    return Q:c[<div class="pod-body"><a id="{$f.subst('/', '_', :g)}"></a>{$html}</div>];
+    
+    $pod-name = $pod-name.subst('/Language/', '/language/').subst('/Type/', '/type/');
+    my $html = $pod>>.&handle(:$pod-name, part-number => $part-number, toc-counter => TOC-Counter.new.set-part-number($part-number), part-config => {:head1(:numbered(True)),:head2(:numbered(True)),:head3(:numbered(True)),:head4(:numbered(True))});
+    return Q:c[<!-- {$pod-name} --><div class="pod-body"><a id="{$pod-name.subst('/', '_', :g)}"></a>{$html}</div>];
 }
