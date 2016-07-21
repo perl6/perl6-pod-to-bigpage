@@ -5,7 +5,6 @@ use MONKEY-SEE-NO-EVAL;
 
 my &verbose = sub (|c) {};
 
-my $source-dir;
 my $cache-dir = './tmp/';
 my Bool $disable-cache;
 
@@ -26,7 +25,6 @@ my @exclude;
 
 sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = False, :$threads = %*ENV<THREADS>.?Int // 2) {
     @exclude = $exclude.defined ?? $exclude.split: ',' !! ();
-    $source-dir = $source-path // './doc/';
     &verbose = &note if $v;
     $disable-cache = $no-cache;
     
@@ -36,9 +34,9 @@ sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = 
     set-foreign-toc(@toc);
     put compose-before-content;
     if $threads > 1 {
-        put await do start { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-dir;
+        put await do start { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-path;
     }else{
-        put do { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-dir;
+        put do { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-path;
     }
     put compose-left-side-menu() ~ compose-after-content();
 }
