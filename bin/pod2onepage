@@ -21,9 +21,9 @@ sub next-part-index () {
 
 my @exclude;
 
-sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = False,
-          :$threads = %*ENV<THREADS>.?Int // 1,
-          :$precomp-path = (%*ENV<TEMP> // %*ENV<TMP> // '/tmp') ~ '/PodToBigfile-precomp' 
+sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, Bool :$no-cache = False,
+          Int :$threads = %*ENV<THREADS>.?Int // 1,
+          Str :$precomp-path = (%*ENV<TEMP> // %*ENV<TMP> // '/tmp') ~ '/PodToBigfile-precomp' 
 ) {
     @exclude = $exclude.defined ?? $exclude.split: ',' !! ();
     &verbose = &note if $v;
