@@ -25,7 +25,7 @@ sub next-part-index () {
 my @exclude;
 
 sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = False, :$threads = %*ENV<THREADS>.?Int // 2) {
-    @exclude = $exclude.split: ',';
+    @exclude = $exclude.defined ?? $exclude.split: ',' !! ();
     $source-dir = $source-path // './doc/';
     &verbose = &note if $v;
     $disable-cache = $no-cache;
