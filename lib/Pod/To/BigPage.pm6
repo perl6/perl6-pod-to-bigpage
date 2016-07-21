@@ -82,7 +82,14 @@ sub setup () is export {
             span.numbered-prefix::after {
                 content: ")\00a0";
             }
-        </style>
+
+            @media print {
+                div.pod-content { padding-left: 0; width: 100% }
+                div.pod-body { width: 90%; }
+                div.left-side-menu { position: initial; top: unset; float: none; width: 100%; }
+                div.left-side-menu-header { display: none; }
+            }
+            </style>
         <link href="pod-to-bigpage.css" rel="stylesheet" type="text/css" />
         EOH
     $html-before-content = '';
@@ -97,7 +104,7 @@ sub set-foreign-index (\index) is export {
     %register := index;
 }
 
-sub register-index-entry(@meta, @content, Str:D :$pod-name!) {
+sub register-index-entry(@meta, @content, :$pod-name!) {
     state $lock = Lock.new;
     state $global-index-counter;
     my $id;
@@ -343,7 +350,7 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context = None,
     Q:c (<span class="indexed{$additional-class}"><a id="{$anchor}" name="{@name}">{$index-display}</a></span>);
 }
 
-multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context where * == Heading, Str:D :$pod-name?, :$part-number?, :$toc-counter?) is export {
+multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context where * == Heading, :$pod-name?, :$part-number?, :$toc-counter?) is export {
     my $index-display = $node.contents>>.&handle($context).Str;
     my $anchor = register-index-entry($node.meta, $node.contents, :$pod-name);
     q:c (<a name="{$anchor}"></a>{$index-display})
