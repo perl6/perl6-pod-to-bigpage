@@ -5,9 +5,6 @@ use MONKEY-SEE-NO-EVAL;
 
 my &verbose = sub (|c) {};
 
-my $cache-dir = './tmp/';
-my Bool $disable-cache;
-
 my @toc;
 
 sub next-part-index () {
@@ -23,20 +20,24 @@ sub next-part-index () {
 
 my @exclude;
 
-sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = False, :$threads = %*ENV<THREADS>.?Int // 1) {
+sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = False,
+          :$threads = %*ENV<THREADS>.?Int // 1,
+          :$precomp-path = (%*ENV<TEMP> // %*ENV<TMP> // '/tmp') ~ '/PodToBigfile-precomp' 
+) {
     @exclude = $exclude.defined ?? $exclude.split: ',' !! ();
     &verbose = &note if $v;
-    $disable-cache = $no-cache;
     
     PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
+    my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $precomp-path.IO );
+    my $precomp = CompUnit::PrecompilationRepository::Default.new(store => $precomp-store);
     
     setup();
     set-foreign-toc(@toc);
     put compose-before-content;
     if $threads > 1 {
-        put await do start { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-path;
+        put await do start { .&parse-pod-file( next-part-index, .substr($source-path.chars), $precomp, $no-cache ) } for sort find-pod-files $source-path;
     }else{
-        put do { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-path;
+        put do { .&parse-pod-file( next-part-index, .substr($source-path.chars), $precomp, $no-cache ) } for sort find-pod-files $source-path;
     }
     put compose-left-side-menu() ~ compose-after-content();
 }
@@ -49,10 +50,8 @@ sub find-pod-files ($dir) {
     }
 }
 
-my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => ((%*ENV<TEMP> // '/tmp') ~ '/PodToBigfile-precomp').IO );
-my $precomp = CompUnit::PrecompilationRepository::Default.new(store => $precomp-store);
 
-sub parse-pod-file ($f, $part-number, $pod-name is copy) {
+sub parse-pod-file ($f, $part-number, $pod-name is copy, $precomp, $disable-cache) {
     my $io = $f.IO;
 
     my $pod; 
