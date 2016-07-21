@@ -11,6 +11,8 @@ P<http://perl6.org/robots.txt>
 
 my $ok-result = q:to/EOH/;
 <p><pre>Hello Camelia!
+</pre> <pre>User-Agent: *
+Disallow: /page-stats
 </pre></p>
 EOH
 
