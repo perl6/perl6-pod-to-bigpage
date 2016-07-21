@@ -35,8 +35,11 @@ sub MAIN (Bool :v(:verbose($v)), Str :$source-path, Str :$exclude, :$no-cache = 
     setup();
     set-foreign-toc(@toc);
     put compose-before-content;
-    # put await do start { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-dir;
-    put do { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-dir;
+    if $threads > 1 {
+        put await do start { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-dir;
+    }else{
+        put do { .&parse-pod-file(next-part-index, .substr($source-path.chars) ) } for sort find-pod-files $source-dir;
+    }
     put compose-left-side-menu() ~ compose-after-content();
 }
 
