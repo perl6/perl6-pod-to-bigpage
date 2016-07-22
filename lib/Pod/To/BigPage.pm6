@@ -34,6 +34,15 @@ sub setup () is export {
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <style type="text/css">
             body { margin-left: 4em; margin-right: 4em; }
+            p {
+                text-rendering: optimizeLegibility;
+                font-feature-settings: "kern";
+                -webkit-font-feature-settings: "kern";
+                -moz-font-feature-settings: "kern";
+                -moz-font-feature-settings: "kern=1";
+                font-kerning: normal;
+                text-align: justify;
+            }
             div.pod-content { padding-left: 20em; }
             div.pod-body { width: 60em }
             div.marginale { float: right; margin-right: -4em; width: 18em; font-size: 66%; text-align: left; }
@@ -61,7 +70,16 @@ sub setup () is export {
             ul.toc li.toc-level-8 { padding-left: 1em; }
             ul.toc li.toc-level-9 { padding-left: 1em; }
             ul.toc li.toc-level-10{ padding-left: 1em; }
-            #left-side-menu { width: 20em; margin-left: -22em; float: left; position: fixed; top: 0; overflow: scroll; height: 100%; padding: 0; white-space: nowrap; }
+            #left-side-menu { 
+                width: 20em; margin-left: -22em; 
+                float: left; 
+                position: fixed;
+                top: 0;
+                overflow: scroll;
+                height: 100%;
+                padding: 0;
+                white-space: nowrap;
+            }
             #left-side-menu-header { 
                 transform: rotate(90deg); 
                 transform-origin: left bottom 0;
@@ -86,8 +104,18 @@ sub setup () is export {
             @media print {
                 div.pod-content { padding-left: 0; width: 100% }
                 div.pod-body { width: 90%; }
-                div.left-side-menu { position: initial; top: unset; float: none; width: 100%; }
-                div.left-side-menu-header { display: none; }
+                #left-side-menu { 
+                    width: unset;
+                    margin-left: unset; 
+                    float: unset; 
+                    position: unset;
+                    top: unset;
+                    overflow: unset;
+                    height: unset;
+                    padding: unset;
+                    white-space: unset;
+                }
+                div.left-side-menu-header, #index { display: none; }
             }
             </style>
         <link href="pod-to-bigpage.css" rel="stylesheet" type="text/css" />
