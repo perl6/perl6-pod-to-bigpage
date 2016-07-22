@@ -10,7 +10,7 @@
     "support" : {
         "source" : "https://github.com/gfldex/perl6-pod-to-bigpage"
     },
-    "depends" : [ ],
+    "depends" : [ "LWP::Simple" ],
     "source-type" : "git",
     "source-url" : "git://github.com/gfldex/perl6-pod-to-bigpage.git"
 }
