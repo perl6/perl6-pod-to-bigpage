@@ -1,4 +1,5 @@
 # Pod::To::BigPage
+[![Build Status](https://travis-ci.org/gfldex/perl6-pod-to-bigpage.svg?branch=master)](https://travis-ci.org/gfldex/perl6-pod-to-bigpage)
 
 Render many Pod6 files into one big file and build a TOC and index. The
 provided CSS does support printing, as far as printing HTML goes.
