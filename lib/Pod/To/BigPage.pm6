@@ -1,9 +1,5 @@
 unit class Pod::To::BigPage;
 
-PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => %*ENV<THREADS>.?Int // 2);
-
-# my $*SCHEDULER =  ThreadPoolScheduler.new(initial_threads => 0, max_threads => %*ENV<THREADS>.?Int // 2);
-
 our $html-header;
 our $html-before-content;
 our $html-after-content;
