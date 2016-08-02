@@ -197,7 +197,7 @@ method render ($pod:) is export {
     compose-toc() ~ compose-after-content
 }
 
-my enum Context ( None => 0, Index => 1 , Heading => 2, HTML => 3, Raw => 4);
+my enum Context ( None => 0, Index => 1 , Heading => 2, HTML => 3, Raw => 4, Output => 5);
 my %list-item-counter is default(0);
 my $last-part-number= -1;
 
@@ -237,6 +237,14 @@ multi sub handle (Pod::Block::Named $node where $node.name eq 'SUBTITLE', :$pod-
 
 multi sub handle (Pod::Block::Named $node where $node.name eq 'Html', :$pod-name?, :$part-number?, :$toc-counter?, :%part-config) is export {
     $node.contents>>.&handle(HTML) ~ NL;
+}
+
+multi sub handle (Pod::Block::Named $node where .name eq 'output', :$pod-name?, :$part-number?, :$toc-counter?, :%part-config) is export {
+    '<pre class="pod-output">' ~ $node.contents>>.&handle(Output).join(NL) ~ '</pre>' ~ NL
+}
+
+multi sub handle (Pod::Block::Para $node, $context where * == Output, :$pod-name?, :$part-number?, :$toc-counter?, :%part-config) is export {
+    $node.contents».&handle().join
 }
 
 multi sub handle (Pod::Block::Para $node, $context = None, :$pod-name?, :$part-number?, :$toc-counter?, :%part-config) is export {
