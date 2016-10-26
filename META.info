@@ -1,4 +1,5 @@
 {
+    "perl" : "6.*",
     "name" : "Pod::To::BigPage",
     "version" : "0.1.1",
     "author" : "Wenzel P. P. Peppmeyer",
