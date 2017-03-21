@@ -297,7 +297,7 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'C', $context where *
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'E', $context = None, :$pod-name?, :$part-number?, :$toc-counter?) is export {
-    $node.meta.fmt('&%s;').join 
+    $node.meta.map({ when Int { "&#$_;" }; when Str { "&$_;" }; $_ }).join 
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'F', $context = None, :$pod-name?, :$part-number?, :$toc-counter?) is export {
