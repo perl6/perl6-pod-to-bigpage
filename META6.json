@@ -12,6 +12,10 @@
         "source" : "https://github.com/gfldex/perl6-pod-to-bigpage"
     },
     "depends" : [ "IO::Socket::SSL", "LWP::Simple" ],
+    "test-depends" : [
+        "Test",
+        "Test::When"
+    ],
     "source-type" : "git",
     "source-url" : "git://github.com/gfldex/perl6-pod-to-bigpage.git"
 }
