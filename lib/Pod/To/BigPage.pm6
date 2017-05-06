@@ -169,7 +169,8 @@ sub compose-index (:$register = %register) is export {
     verbose "found duplicate index entry {.key} at {.value.map: {'#i' ~ .Str}}" for @dupes;
     '<div id="index"><ul class="index">' ~ NL ~
     $register.sort(*.key.lc).map({
-        '<li>' ~ .key.Str.subst('&', '&amp;', :g).subst('<', '&lt;', :g).subst('>', '&gt;', :g) ~ '&emsp;' ~ .value.map({ '<a href="#i' ~ .Str ~ '">' ~ .Str ~ '</a>' }) ~ '</li>'
+        '<li>' ~ .key.Str.trans([ '&', '<', '>' ] => [ '&amp;', '&lt;', '&gt;'])
+        ~ '&emsp;' ~ .value.map({ '<a href="#i' ~ .Str ~ '">' ~ .Str ~ '</a>' }) ~ '</li>'
     }) ~
     '</ul></div>'
 }
