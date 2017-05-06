@@ -214,7 +214,7 @@ my $last-part-number= -1;
 
 multi sub handle (Pod::Block::Code $node, :$pod-name?, :$part-number?, :$toc-counter?, :%part-config?) is export {
     my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
-    Q:c (<pre class="code{$additional-class}">{$node.contents>>.&handle().&escape-markup}</pre>) ~ NL;
+    Q:c (<pre class="code{$additional-class}">{$node.contents>>.&handle}</pre>) ~ NL;
 }
 
 multi sub handle (Pod::Block::Comment $node, :$pod-name?, :$part-number?, :$toc-counter?, :%part-config?) is export {
@@ -439,7 +439,7 @@ multi sub handle (Pod::Raw $node, :$pod-name?, :$part-number?, :$toc-counter?) i
 # }
 
 multi sub handle (Str $node, Context $context?, :$pod-name?, :$part-number?, :$toc-counter?) is export {
-    $node.subst('&', '&amp;', :g).subst('<', '&lt;', :g);
+    escape-markup $node
 }
 
 multi sub handle (Str $node, Context $context where * == HTML, :$pod-name?, :$part-number?, :$toc-counter?) is export {
