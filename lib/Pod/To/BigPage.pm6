@@ -120,7 +120,6 @@ sub setup () is export {
                 div.left-side-menu-header, #index { display: none; }
             }
             </style>
-        <link href="pod-to-bigpage.css" rel="stylesheet" type="text/css" />
         EOH
     $html-before-content = '';
     $html-after-content = '';
