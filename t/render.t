@@ -20,6 +20,7 @@ And just your average text.
 
 setup();
 my $pre = compose-before-content($=pod);
+
 say $pre;
 
 my $ok-result = q:to/EOH/;
