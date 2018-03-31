@@ -32,7 +32,6 @@ class TOC-Counter is export {
 
 sub setup () is export {
     $html-header = q:to/EOH/;
-        <title>Untitled</title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <style type="text/css">
             body { margin-left: 4em; margin-right: 4em; }
@@ -179,7 +178,7 @@ sub compose-left-side-menu () is export {
     '</div>'
 }
 
-sub compose-before-content () is export {
+sub compose-before-content ( $pod ) is export {
     '<?xml version="1.0" encoding="utf-8" ?>' ~ NL ~
     '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' ~ NL ~
     '<html xmlns="http://www.w3.org/1999/xhtml">' ~ NL ~
@@ -196,8 +195,8 @@ sub compose-after-content () is export {
 
 method render ($pod:) is export {
     setup();
-
-    compose-before-content ~
+    say $pod.flat;
+    compose-before-content( $pod ) ~
     await do start { handle($_) } for $pod.flat ~
     compose-toc() ~ compose-after-content
 }
