@@ -1,4 +1,7 @@
 use v6;
+
+use lib <lib ../lib>;
+
 use Test;
 use Test::When <online>;
 use Pod::To::BigPage;
@@ -10,8 +13,6 @@ plan 1;
 P<./t/hello-camelia.txt>
 P<http://http.perl6.org/robots.txt>
 =end pod
-
-dd $=pod>>.&handle(pod-name => 'test.pod6', toc-counter => TOC-Counter.new );
 
 my $ok-result = q:to/EOH/;
 <a name="t0.1"></a><h1 id="_routine_test.pod6-This_is_the_head_./t/hello-camelia.txt_http://http.perl6.org/robots.txt">This is the head <pre>Hello Camelia!
