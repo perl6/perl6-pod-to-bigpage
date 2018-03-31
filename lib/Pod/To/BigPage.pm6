@@ -38,10 +38,9 @@ sub setup () is export {
             body { margin-left: 4em; margin-right: 4em; }
             p {
                 text-rendering: optimizeLegibility;
-                font-feature-settings: "kern";
-                -webkit-font-feature-settings: "kern";
-                -moz-font-feature-settings: "kern";
-                -moz-font-feature-settings: "kern=1";
+                font-feature-settings: "kern" 1;
+                -webkit-font-feature-settings: "kern" 1;
+                -moz-font-feature-settings: "kern" 1;
                 font-kerning: normal;
                 text-align: justify;
             }
