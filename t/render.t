@@ -19,7 +19,7 @@ And just your average text.
 =end pod
 
 setup();
-my $pre = compose-before-content($pod);
+my $pre = compose-before-content($=pod);
 say $pre;
 
 my $ok-result = q:to/EOH/;

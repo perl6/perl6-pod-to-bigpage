@@ -179,10 +179,12 @@ sub compose-left-side-menu () is export {
 }
 
 sub compose-before-content ( $pod ) is export {
+    my @h1 =  $pod[0].contents.grep( * ~~ Pod::Heading).grep( *.level == 1 );
     '<?xml version="1.0" encoding="utf-8" ?>' ~ NL ~
     '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' ~ NL ~
     '<html xmlns="http://www.w3.org/1999/xhtml">' ~ NL ~
     '<head>' ~ NL ~
+    '<title>' ~@h1[0].contents[0].contents ~'</title>'~
     $html-header ~ NL ~
     '</head>' ~ NL ~
     qq{<body>$html-before-content\n  <div class="pod-content">} ~ NL
