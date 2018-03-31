@@ -19,15 +19,5 @@ And just your average text.
 =end pod
 
 setup();
-my $pre = compose-before-content($=pod);
+like compose-before-content($=pod), /This\s+is\s+the\s+head/, "Head inserted";
 
-say $pre;
-
-my $ok-result = q:to/EOH/;
-<a name="t0.1"></a><h1 id="_routine_test.pod6-This_is_the_head_./t/hello-camelia.txt_http://http.perl6.org/robots.txt">This is the head <pre>Hello Camelia!
-</pre> <pre>User-Agent: *
-Disallow: /page-stats
-</pre></h1>
-EOH
-
-is $=pod>>.&handle(pod-name => 'test.pod6', toc-counter => TOC-Counter.new , part-number => 1), $ok-result, 'relative path'
