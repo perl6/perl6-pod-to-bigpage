@@ -187,7 +187,7 @@ multi compose-before-content ( Array $pod ) is export {
 }
 
 multi compose-before-content ( Str $title ) is export {
-    say "compose-array";
+#    say "compose-array";
     return '<?xml version="1.0" encoding="utf-8" ?>' ~ NL ~
     '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' ~ NL ~
     '<html xmlns="http://www.w3.org/1999/xhtml">' ~ NL ~
@@ -205,7 +205,7 @@ sub compose-after-content () is export {
 
 method render ($pod:) is export {
     setup();
-    say $pod.flat;
+#    say $pod.flat;
     compose-before-content( $pod ) ~
     await do start { handle($_) } for $pod.flat ~
     compose-toc() ~ compose-after-content
