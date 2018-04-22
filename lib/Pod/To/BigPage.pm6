@@ -186,11 +186,22 @@ multi compose-before-content ( Array $pod ) is export {
     return compose-before-content( $title );
 }
 
-multi compose-before-content ( Str $title ) is export {
-#    say "compose-array";
+multi compose-before-content ( Str $title, $xhtml where $xhtml == True ) is export {
+
     return '<?xml version="1.0" encoding="utf-8" ?>' ~ NL ~
     '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' ~ NL ~
     '<html xmlns="http://www.w3.org/1999/xhtml">' ~ NL ~
+    '<head>' ~ NL ~
+    '<title>' ~ $title ~'</title>'~ NL ~
+    $html-header ~ NL ~
+    '</head>' ~ NL ~
+    qq{<body>$html-before-content\n  <div class="pod-content">} ~ NL
+}
+
+multi compose-before-content ( Str $title, $xhtml where $xhtml == False) is export {
+
+    return '<!DOCTYPE html>' ~ NL ~
+    '<html>' ~ NL ~
     '<head>' ~ NL ~
     '<title>' ~ $title ~'</title>'~ NL ~
     $html-header ~ NL ~
