@@ -181,7 +181,7 @@ sub compose-left-side-menu () is export {
 proto compose-before-content(|) {*}
 
 multi compose-before-content ( Array $pod ) is export {
-    compose-before-content( $pod, "x");
+    compose-before-content( $pod, 'x');
 }
 
 multi compose-before-content ( Array $pod, Str $html ) is export {

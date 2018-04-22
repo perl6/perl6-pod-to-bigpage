@@ -6,7 +6,7 @@ provided CSS does support printing, as far as printing HTML goes.
 
 ## SYNOPSIS
 
-Let it find the `*.pod6` for you and run using two threads at a time.
+Let us find the `*.pod6` for you and run using two threads at a time.
 
     pod2onepage -v --threads=2 --source-path=../../perl6-doc/doc \
         --exclude=404.pod6,/.git,/precompiled > tmp/html.xhtml
@@ -35,7 +35,7 @@ Let it find the `*.pod6` for you and run using two threads at a time.
 
 * `--precomp-path`
 
-  Where to put precompiled `pod6` files. Defaults to environment
+  Sets the path where precompiled `pod6` files are created. Defaults to environment
   variable `TEMP`, `TMP` or `/tmp`.
 
 ## Testing
