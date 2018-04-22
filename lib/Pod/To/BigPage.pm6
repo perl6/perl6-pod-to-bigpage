@@ -6,8 +6,32 @@ unit class Pod::To::BigPage;
 
 =SUBTITLE Convert a bunch of Pod 6 files to (X)HTML
 
-
 Module and script for converting documentation written in Pod 6 to a single file publishable in the web.
+
+=begin SYNOPSIS
+
+From the command line:
+
+     pod2onepage -v --threads=2 --source-path=../../perl6-doc/doc \
+                 --exclude=404.pod6,/.git,/precompiled > tmp/html.xhtml
+
+It can be used also as a library.
+
+=begin code
+use Pod::To::BigPage;
+=begin pod
+=head1 This is the head
+=head2 More stuff here
+
+And just your average text.
+=end pod
+
+setup();
+compose-before-content($=pod); # Produces XHTML
+compose-before-content($=pod,''); # Produces HTML
+=end code
+
+=end SYNOPSIS
 
 =end pod
 
