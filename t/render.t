@@ -19,5 +19,9 @@ And just your average text.
 =end pod
 
 setup();
+
+# Tests start here
 like compose-before-content($=pod), /This\s+is\s+the\s+head/, "Head inserted";
+like compose-before-content($=pod, 'x'), /xml \s+ version/, "Head with xml inserted";
+like compose-before-content($=pod, ''), /DOCTYPE \s+ html/, "Head with html inserted";
 
