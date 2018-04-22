@@ -1,5 +1,16 @@
 unit class Pod::To::BigPage;
 
+=begin pod
+
+=TITLE Pod::To::BigPage
+
+=SUBTITLE Convert a bunch of Pod 6 files to (X)HTML
+
+
+Module and script for converting documentation written in Pod 6 to a single file publishable in the web.
+
+=end pod
+
 our $html-header;
 our $html-before-content;
 our $html-after-content;
