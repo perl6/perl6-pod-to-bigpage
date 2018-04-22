@@ -46,10 +46,13 @@ constant NL = "\n";
 
 my &verbose = &note;
 
+
+#| Sets verbose value
 sub set-verbose(&new-verbose) is export {
     &verbose = &new-verbose
 }
 
+#| Class for counting number of headings for the table of contents
 class TOC-Counter is export {
     has Int @!counters is default(0);
     method Str () { @!counters>>.Str.join: '.' }
@@ -65,6 +68,7 @@ class TOC-Counter is export {
     }
 }
 
+#| Sets up global header and HTML bolierplate
 sub setup () is export {
     $html-header = q:to/EOH/;
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
@@ -158,14 +162,17 @@ sub setup () is export {
     $html-after-content = '';
 }
 
+#| Uses a different table of contents
 sub set-foreign-toc (\toc) is export {
     @toc := toc;
 }
 
+#| Uses a different index
 sub set-foreign-index (\index) is export {
     %register := index;
 }
 
+#| Registers an entry for the index in a thread-safe way.
 sub register-index-entry(@meta, @content, :$pod-name!) {
     state $lock = Lock.new;
     state $global-index-counter;
@@ -177,6 +184,8 @@ sub register-index-entry(@meta, @content, :$pod-name!) {
     $id
 }
 
+
+#| Registers an entry for the table of contents in a thread-safe way.
 sub register-toc-entry($level, $text, $part-toc-counter, :$hide) {
     state $lock = Lock.new;
     my $clone;
@@ -188,6 +197,7 @@ sub register-toc-entry($level, $text, $part-toc-counter, :$hide) {
     $clone
 }
 
+#| Composes the table of contents
 sub compose-toc (:$toc = @toc) is export {
     '<div id="toc"><ul class="toc">' ~ NL ~
     @toc\
@@ -196,6 +206,7 @@ sub compose-toc (:$toc = @toc) is export {
     '</ul></div>'
 }
 
+#| Composes the index from the register
 sub compose-index (:$register = %register) is export {
     my @dupes = $register.grep(*.value.elems > 1);
     verbose "found duplicate index entry {.key} at {.value.map: {'#i' ~ .Str}}" for @dupes;
@@ -207,12 +218,14 @@ sub compose-index (:$register = %register) is export {
     '</ul></div>'
 }
 
+#| Composes the menu on the left hand side.
 sub compose-left-side-menu () is export {
     '<div id="left-side-menu-header"><a href="#toc"><span class="selection">TOC</span></a><a href="#index"><span class="selection">Index</span></a></div><div id="left-side-menu">' ~
     compose-toc() ~ compose-index() ~
     '</div>'
 }
 
+#| Composes content that goes before the POD info. Produces XHTML (default) or HTML
 proto compose-before-content(|) {*}
 
 multi compose-before-content ( Array $pod ) is export {
@@ -252,11 +265,13 @@ multi compose-before-content ( Str $title, '') is export {
     qq{<body>$html-before-content\n  <div class="pod-content">} ~ NL
 }
 
+#| Composes content that bookends page.
 sub compose-after-content () is export {
     qq{  </div>$html-after-content\n</body>} ~
     '</html>'
 }
 
+#| Renders the pod
 method render ($pod:) is export {
     setup();
 #    say $pod.flat;
@@ -273,6 +288,7 @@ my $last-part-number= -1;
 #     {*}
 # }
 
+#| Multi for handling different types of Pod blocks. 
 multi sub handle (Pod::Block::Code $node, :$pod-name?, :$part-number?, :$toc-counter?, :%part-config?) is export {
     my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
     Q:c (<pre class="code{$additional-class}">{$node.contents>>.&handle}</pre>) ~ NL;
@@ -365,21 +381,6 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'E', $context = None,
 multi sub handle (Pod::FormattingCode $node where .type eq 'F', $context = None, :$pod-name?, :$part-number?, :$toc-counter?) is export {
     my $extraclass = $node.config && $node.config<class> ?? " " ~ $node.config<class>.subst('"', '&quot;') !! '';
     Q:c (<span class="filename{$extraclass}">{$node.contents>>.&handle($context)}</span>)
-}
-
-sub rewrite-link($link-target is copy, :$part-number!){
-    given $link-target {
-        when .starts-with( any(<http:// https:// irc://>) ) { succeed }
-        when .starts-with('#')           { $link-target = '#' ~ $part-number ~ '-' ~ $link-target.substr(1) }
-        when .starts-with(any('a'..'z')) { $link-target = "/routine/$link-target"; proceed }
-        when .starts-with(any('A'..'Z')) { $link-target = "/type/$link-target"; proceed }
-        when .starts-with('/')           {
-            my @parts = $link-target.split('#');
-            @parts[0] = '#' ~ @parts[0].subst('/', '_', :g) ~ '.pod6';
-            $link-target = @parts.join('-');
-        }
-    }
-    $link-target
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'L', $context = None, :$pod-name?, :$part-number?, :$toc-counter?) is export {
@@ -511,7 +512,26 @@ multi sub handle (Nil, :$pod-name?, :$part-number?, :$toc-counter?) is export {
     die 'Nil';
 }
 
+#| Rewrites a link 
+sub rewrite-link($link-target is copy, :$part-number!){
+    given $link-target {
+        when .starts-with( any(<http:// https:// irc://>) ) { succeed }
+        when .starts-with('#')           { $link-target = '#' ~ $part-number ~ '-' ~ $link-target.substr(1) }
+        when .starts-with(any('a'..'z')) { $link-target = "/routine/$link-target"; proceed }
+        when .starts-with(any('A'..'Z')) { $link-target = "/type/$link-target"; proceed }
+        when .starts-with('/')           {
+            my @parts = $link-target.split('#');
+            @parts[0] = '#' ~ @parts[0].subst('/', '_', :g) ~ '.pod6';
+            $link-target = @parts.join('-');
+        }
+    }
+    $link-target
+}
+
+#| Escapes markup to avoid errors
 sub escape-markup ($_) {
     .trans: [ '&',     '<',    '>',    '"',      ]
     =>      [ '&amp;', '&lt;', '&gt;', '&quot;', ]
 }
+
+
