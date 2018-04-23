@@ -12,12 +12,12 @@ Install it the usual way
     
 And test it 
 
-    zef test
+    zef test .
     
 
 ## SYNOPSIS
 
-Let us find the `*.pod6` for you and run using two threads at a time.
+Let us find the `*.pod6` files for you and run using two threads at a time.
 
     pod2onepage -v --threads=2 --source-path=../../perl6-doc/doc \
         --exclude=404.pod6,/.git,/precompiled > tmp/html.xhtml
@@ -26,7 +26,7 @@ You can use, for instance,
 
     perl6 -Ilib bin/pod2onepage -v --source-path=. --html >  tmp/pod2onepage.html
     
-to generate a single page in HTML from [`README.pod6`](README.pod6)
+to generate a single page in HTML from the [`README.pod6`](README.pod6)
 included here. 
     
 ## Options
@@ -58,7 +58,7 @@ included here.
 
 * `--html`
 
-  Generate HTML instead of the default XHTML
+  Generate HTML instead of the default XHTML.
   
   
 ## Testing

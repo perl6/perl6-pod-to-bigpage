@@ -7,7 +7,7 @@ use Test::When <online>;
 use Pod::To::BigPage;
 
 # Test the rendering of a full page
-plan 1;
+plan 3;
 
 =begin pod
 
