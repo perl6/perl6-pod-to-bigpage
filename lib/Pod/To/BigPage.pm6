@@ -465,13 +465,23 @@ multi sub handle (Pod::Heading $node, :$pod-name?, :$part-number?, :$toc-counter
     my $raw-text = $node.contents>>.&handle(Raw).List.flat.join.trim;
     my $id = $pod-name.subst('.pod6', '') ~ '#' ~ $raw-text.subst(' ', '_', :g).subst('"','&quot;', :g);
     $id = rewrite-link($id, :$part-number).substr(1);
+    say %part-config;
     if $node.config<numbered> || %part-config{'head' ~ $node.level}<numbered>.?Int {
+        my $output ='';
         my $anchor = register-toc-entry($l, $text, $toc-counter);
-        return Q:c (<a name="t{$anchor}"{$class}></a><h{$l} id="{$id}">{$anchor} {$text}</h{$l}>) ~ NL
+        if %part-config<anchored> {
+            $output = Q:c ( <a name="t{$anchor}"{$class}></a> );
+        }
+        return Q:c ({$output} <h{$l} id="{$id}">{$text}</h{$l}>) ~ NL
     } else {
+        my $output='';
         my $anchor = register-toc-entry($l, $text, $toc-counter, :hide);
-        return Q:c (<a name="t{$anchor}"{$class}></a><h{$l} id="{$id}">{$text}</h{$l}>) ~ NL
+        if %part-config<anchored> {
+            $output = Q:c ( <a name="t{$anchor}"{$class}></a> );
+        }
+        return Q:c ({$output} <h{$l} id="{$id}">{$text}</h{$l}>) ~ NL
     }
+
 }
 
 multi sub handle (Pod::Item $node, :$pod-name?, :$part-number?, :$toc-counter?, :%part-config?) is export {
