@@ -39,9 +39,9 @@ sub MAIN (Bool :v(:verbose($v)), Str :$source-path = ".", Str :$exclude,
     put compose-before-content( $title, $html??''!!'x' );
     say "Chars ", $source-path.chars;
     if $threads > 1 {
-        put await do start { .&parse-pod-file( next-part-index, .substr($source-path.chars), $precomp, $no-cache, $anchored ) } for sort find-pod-files($source-path, @exclude);
+        put await do start { .&parse-pod-file( next-part-index, just-the-name($_,$source-path), $precomp, $no-cache, $anchored ) } for sort find-pod-files($source-path, @exclude);
     }else{
-        put do { .&parse-pod-file( next-part-index, .substr($source-path.chars), $precomp, $no-cache, $anchored ) } for sort find-pod-files($source-path, @exclude);
+        put do { .&parse-pod-file( next-part-index, just-the-name($_, $source-path), $precomp, $no-cache, $anchored ) } for sort find-pod-files($source-path, @exclude);
     }
     put compose-left-side-menu() ~ compose-after-content();
 }
@@ -86,4 +86,8 @@ sub parse-pod-file ($f, $part-number, $pod-name is copy, $precomp, $disable-cach
                                              }
                              );
     return Q:c[<!-- {$pod-name} --><div class="pod-body"><a id="{$pod-name.subst('/', '_', :g)}"></a>{$html}</div>];
+}
+
+sub just-the-name( $filename, $source-path ) {
+    return $source-path eq "." ?? $filename !! $filename.substr($source-path.chars);
 }
