@@ -12,7 +12,7 @@ Module and script for converting documentation written in Pod 6 to a single fil
 
 From the command line:
 
-     pod2onepage -v --threads=2 --source-path=../../perl6-doc/doc \
+     pod2onepage -v --source-path=../../perl6-doc/doc \
                  --exclude=404.pod6,/.git,/precompiled > tmp/html.xhtml
 
 It can be used also as a library.
@@ -310,7 +310,7 @@ multi sub handle (Pod::Block::Named $node where $node.name eq 'TITLE', :$pod-nam
     my $additional-class = ($node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '').subst('"', '&quot;');
     my $text = $node.contents[0].contents[0].Str;
     my $anchor = register-toc-entry(0, $text, $toc-counter);
-    Q:c (<a name="t{$anchor}"><h1 class="title{$additional-class}">{$anchor} {$text}</h1></a>)
+    Q:c (<a name="t{$anchor}"></a><h1 class="title{$additional-class}">{$anchor} {$text}</h1>)
 }
 
 multi sub handle (Pod::Block::Named $node where $node.name eq 'SUBTITLE', :$pod-name?, :$part-number?, :$toc-counter?, :%part-config) is export {
@@ -454,8 +454,8 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context = None,
 multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context where * == Heading, :$pod-name?, :$part-number?, :$toc-counter?) is export {
     my $index-display = $node.contents>>.&handle($context).Str;
     my $anchor = register-index-entry($node.meta, $node.contents, :$pod-name);
-    #    q:c (<a name="{$anchor}"></a>{$index-display})
-    $index-display;
+    q:c (<a name="{$anchor}"></a>{$index-display});
+
 }
 
 multi sub handle (Pod::Heading $node, :$pod-name?, :$part-number?, :$toc-counter, :%part-config) is export {

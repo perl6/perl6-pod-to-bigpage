@@ -36,7 +36,7 @@ compose-before-content($=pod,''); # Produces HTML
 
 =end SYNOPSIS
 
-=head2 Options
+=head2 X<Options|Options>
 
 =item C<-v --verbose>
 
@@ -65,8 +65,4 @@ compose-before-content($=pod,''); # Produces HTML
   Generate HTML instead of the default XHTML.
   
   
-## Testing
-
-To enable network tests to be run, set `ONLINE_TESTING` environment variable to a true value.
-
 =end pod
