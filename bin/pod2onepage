@@ -37,6 +37,7 @@ sub MAIN (Bool :v(:verbose($v)), Str :$source-path = ".", Str :$exclude,
     my @toc;
     set-foreign-toc(@toc);
     put compose-before-content( $title, $html??''!!'x' );
+    say "Chars ", $source-path.chars;
     if $threads > 1 {
         put await do start { .&parse-pod-file( next-part-index, .substr($source-path.chars), $precomp, $no-cache, $anchored ) } for sort find-pod-files($source-path, @exclude);
     }else{
@@ -49,6 +50,7 @@ sub find-pod-files ($dir, @exclude) {
     state $none-exclude = @exclude.none;
     my sub recurse ($dir) { 
         gather for dir($dir) {
+            say $_;
             take .Str if .Str.ends-with($none-exclude) && .extension ~~ rx:i/pod6$/;
             take slip sort recurse $_ if .d && .Str.ends-with($none-exclude);
         }

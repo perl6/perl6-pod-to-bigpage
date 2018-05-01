@@ -68,7 +68,7 @@ class TOC-Counter is export {
     }
 }
 
-#| Sets up global header and HTML bolierplate
+#| Sets up global header and HTML boilerplate
 sub setup () is export {
     $html-header = q:to/EOH/;
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
@@ -161,6 +161,19 @@ sub setup () is export {
     $html-before-content = '';
     $html-after-content = '';
 }
+
+#| Recursively finds all files for creating the big page
+ sub find-pod-files ($dir, @exclude, @extensions = <pod6> ) is export {    
+     state $none-exclude = @exclude.none;
+     my $all-extensions = @extensions.join("|");
+     my $ending-rx = rx:i/ <$all-extensions> $ /;
+     my sub recurse ($dir) { 
+         gather for dir($dir) {
+             take .Str if .Str.ends-with($none-exclude) && .extension ~~ $ending-rx;
+             take slip sort recurse $_ if .d && .Str.ends-with($none-exclude);
+         }
+     }($dir)
+ }
 
 #| Uses a different table of contents
 sub set-foreign-toc (\toc) is export {
