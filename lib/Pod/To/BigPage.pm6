@@ -461,7 +461,7 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context = None,
     my $index-display = $node.contents>>.&handle($context).Str;
     my @name = $node.meta».&escape-markup;
     my $anchor = register-index-entry(@name, $node.contents, :$pod-name);
-    Q:c (<span class="indexed{$additional-class}" id="{$anchor}" name="{@name}">{$index-display}</span>);
+    Q:c (<a id="i{$anchor}" name="{@name}"></a><span class="indexed{$additional-class}">{$index-display}</span>);
 }
 
 multi sub handle (Pod::FormattingCode $node where .type eq 'X', $context where * == Heading, :$pod-name?, :$part-number?, :$toc-counter?) is export {
