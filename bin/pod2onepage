@@ -46,17 +46,6 @@ sub MAIN (Bool :v(:verbose($v)), Str :$source-path = ".", Str :$exclude,
     put compose-left-side-menu() ~ compose-after-content();
 }
 
-sub find-pod-files ($dir, @exclude) {
-    state $none-exclude = @exclude.none;
-    my sub recurse ($dir) { 
-        gather for dir($dir) {
-            say $_;
-            take .Str if .Str.ends-with($none-exclude) && .extension ~~ rx:i/pod6$/;
-            take slip sort recurse $_ if .d && .Str.ends-with($none-exclude);
-        }
-    }($dir)
-}
-
 my $precomp-lock = Lock.new;
 sub parse-pod-file ($f, $part-number, $pod-name is copy, $precomp, $disable-cache, $anchored) {
     my $io = $f.IO;

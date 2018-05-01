@@ -163,7 +163,7 @@ sub setup () is export {
 }
 
 #| Recursively finds all files for creating the big page
- sub find-pod-files ($dir, @exclude, @extensions = <pod6> ) is export {    
+ sub find-pod-files ($dir, @exclude, @extensions = ["pod6"] ) is export {    
      state $none-exclude = @exclude.none;
      my $all-extensions = @extensions.join("|");
      my $ending-rx = rx:i/ <$all-extensions> $ /;
