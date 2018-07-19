@@ -39,9 +39,14 @@ sub MAIN (Bool :v(:verbose($v)), Str :$source-path = ".", Str :$exclude,
     set-foreign-toc(@toc);
     put compose-before-content( $title, $html??''!!'x' );
     if $threads > 1 {
-        put await do start { .&parse-pod-file( next-part-index, just-the-name($_,$source-path), $precomp, $no-cache, $anchored ) } for sort find-pod-files($source-path, @exclude);
-    }else{
-        put do { .&parse-pod-file( next-part-index, just-the-name($_, $source-path), $precomp, $no-cache, $anchored ) } for sort find-pod-files($source-path, @exclude);
+        put await do start { 
+	    .&parse-pod-file( next-part-index, just-the-name($_,$source-path), $precomp, $no-cache, $anchored )
+	} for sort find-pod-files($source-path, @exclude);
+    }
+    else {
+        put do { 
+	    .&parse-pod-file( next-part-index, just-the-name($_, $source-path), $precomp, $no-cache, $anchored )
+	} for sort find-pod-files($source-path, @exclude);
     }
     put compose-left-side-menu() ~ compose-after-content();
 }
@@ -57,7 +62,8 @@ sub parse-pod-file ($f, $part-number, $pod-name is copy, $precomp, $disable-cach
     if $disable-cache {
         $pod = (EVAL ($io.slurp ~ "\n\$=pod"));
         verbose "processed $f";
-    }else{
+    }
+    else {
         use nqp;
         my $id = nqp::sha1(~$f);
         $precomp-lock.protect: {
