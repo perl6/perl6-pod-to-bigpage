@@ -11,10 +11,12 @@
     "support" : {
         "source" : "https://github.com/perl6/perl6-pod-to-bigpage"
     },
-    "depends" : [ "LWP::Simple" ],
+    "depends" : [ "LWP::Simple",
+                ],
     "test-depends" : [
         "Test",
-        "Test::When"
+        "Test::When",
+        "IO::Socket::SSL"
     ],
     "source-type" : "git",
     "source-url" : "git://github.com/perl6/perl6-pod-to-bigpage.git"
