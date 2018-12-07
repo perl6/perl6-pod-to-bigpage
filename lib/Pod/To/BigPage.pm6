@@ -350,7 +350,7 @@ multi sub handle (Pod::Block::Para $node, $context = None, :$pod-name?, :$part-n
 }
 
 multi sub handle (Pod::Defn $node, $context = None, :$pod-name?, :$part-number?, :$toc-counter?, :%part-config) is export {
-    my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
+    my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! ''; 
     "<dl$class><dd>" ~ $node.term ~ '</dd><dt>' ~ $node.contents>>.&handle($context, :$pod-name, :$part-number).join('') ~ '</dt></dl>' ~ NL;
 }
 
