@@ -163,11 +163,11 @@ sub setup () is export {
 }
 
 #| Recursively finds all files for creating the big page
- sub find-pod-files ($dir, @exclude, @extensions = ["pod6"] ) is export {    
+ sub find-pod-files ($dir, @exclude, @extensions = ["pod6"] ) is export {
      state $none-exclude = @exclude.none;
      my $all-extensions = @extensions.join("|");
      my $ending-rx = rx:i/ <$all-extensions> $ /;
-     my sub recurse ($dir) { 
+     my sub recurse ($dir) {
          gather for dir($dir) {
              take .Str if .Str.ends-with($none-exclude) && .extension ~~ $ending-rx;
              take slip sort recurse $_ if .d && .Str.ends-with($none-exclude);
@@ -301,7 +301,7 @@ my $last-part-number= -1;
 #     {*}
 # }
 
-#| Multi for handling different types of Pod blocks. 
+#| Multi for handling different types of Pod blocks.
 multi sub handle (Pod::Block::Code $node, :$pod-name?, :$part-number?, :$toc-counter?, :%part-config?) is export {
     my $additional-class = $node.config && $node.config<class> ?? ' ' ~ $node.config<class> !! '';
     Q:c (<pre class="code{$additional-class}">{$node.contents>>.&handle}</pre>) ~ NL;
@@ -347,6 +347,11 @@ multi sub handle (Pod::Block::Para $node, $context where * == Output, :$pod-name
 multi sub handle (Pod::Block::Para $node, $context = None, :$pod-name?, :$part-number?, :$toc-counter?, :%part-config) is export {
     my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! '';
     "<p$class>" ~ $node.contents>>.&handle($context, :$pod-name, :$part-number).join('') ~ '</p>' ~ NL;
+}
+
+multi sub handle (Pod::Defn $node, $context = None, :$pod-name?, :$part-number?, :$toc-counter?, :%part-config) is export {
+    my $class = $node.config && $node.config<class> ?? ' class = "' ~ $node.config<class>.subst('"', '&quot;') ~ '"' !! ''; 
+    "<dl$class><dd>" ~ $node.term ~ '</dd><dt>' ~ $node.contents>>.&handle($context, :$pod-name, :$part-number).join('') ~ '</dt></dl>' ~ NL;
 }
 
 multi sub handle (Pod::Block::Para $node, $context where * != None, :$pod-name?, :$part-number?, :$toc-counter?) is export {
@@ -535,7 +540,7 @@ multi sub handle (Nil, :$pod-name?, :$part-number?, :$toc-counter?) is export {
     die 'Nil';
 }
 
-#| Rewrites a link 
+#| Rewrites a link
 sub rewrite-link($link-target is copy, :$part-number!){
     given $link-target {
         when .starts-with( any(<http:// https:// irc://>) ) { succeed }
@@ -556,5 +561,3 @@ sub escape-markup ($_) {
     .trans: [ '&',     '<',    '>',    '"',      ]
     =>      [ '&amp;', '&lt;', '&gt;', '&quot;', ]
 }
-
-
