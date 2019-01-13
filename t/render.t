@@ -3,7 +3,6 @@ use v6;
 use lib <lib ../lib>;
 
 use Test;
-use Test::When <online>;
 use Pod::To::BigPage;
 
 # Test the rendering of a full page
