@@ -1,7 +1,7 @@
 {
     "perl" : "6.*",
     "name" : "Pod::To::BigPage",
-    "version" : "0.5.0",
+    "version" : "0.5.1",
     "author" : "Perl 6",
     "description" : "Render many pod6-files into one (big) html-file.",
     "license" : "Artistic-2.0",

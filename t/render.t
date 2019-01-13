@@ -6,7 +6,7 @@ use Test;
 use Pod::To::BigPage;
 
 # Test the rendering of a full page
-plan 7;
+plan 8;
 
 =begin pod
 
@@ -15,6 +15,8 @@ plan 7;
 =head2 More stuff here
 
 And just your average text.
+
+And a link that can go wrong: L<Array|/type/Array>
 =end pod
 
 setup();

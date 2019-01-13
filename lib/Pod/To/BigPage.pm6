@@ -543,7 +543,6 @@ multi sub handle (Nil, :$pod-name?, :$part-number?, :$toc-counter?) is export {
 #| Rewrites a link if needed
 sub rewrite-link($link-target is copy, :$part-number!){
     $link-target = $link-target[0] if $link-target ~~ Array; # Hack for when links arrive as an array
-    say "$link-target starts-with → ", $link-target.starts-with(any('a'..'z'));
     given $link-target {
         when .starts-with( <http:// https:// irc://>)  { succeed }
         when .starts-with('#')           { $link-target = '#' ~ $part-number ~ '-' ~ $link-target.substr(1) }
@@ -551,13 +550,11 @@ sub rewrite-link($link-target is copy, :$part-number!){
         when so .starts-with(any('A'..'Z')) { $link-target = "/type/$link-target"; proceed }
         when .starts-with('/')           {
             my @parts = $link-target.split('#');
-            say @parts;
             @parts[0] = '#' ~ @parts[0].subst('/', '_', :g) ~ '.pod6';
             $link-target = @parts.join('-');
         }
         default { say "$link-target failed" }
     }
-    say "Result → $link-target";
     $link-target
 }
 
