@@ -11,7 +11,7 @@
     "support" : {
         "source" : "https://github.com/perl6/perl6-pod-to-bigpage"
     },
-    "depends" : [ "LWP::Simple" ],
+    "depends" : [ "HTTP::UserAgent", "URI" ],
     "test-depends" : [
         "Test",
         "Test::When",

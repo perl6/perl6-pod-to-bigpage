@@ -425,22 +425,33 @@ multi sub handle (Pod::FormattingCode $node where .type eq 'P', $context = None,
     my $content = $node.contents>>.&handle($context).Str;
     my $link = $node.meta eqv [] | [""] ?? $content !! $node.meta;
 
-    use LWP::Simple;
-    my @url = LWP::Simple.parse_url($link);
+    use URI;
+    my URI $url .= new($link);
+    my $path = $url.path.Str;
+
     my $doc;
-    given @url[0] {
+    given $url.scheme {
         when 'http' | 'https' {
-            $doc = LWP::Simple.get($link);
+            use HTTP::UserAgent;
+            state HTTP::UserAgent $ua .= new;
+
+            my $resp = $ua.get($link);
+            if $resp.is-success {
+                $doc = $resp.content;
+            } else {
+                warn "Error fetching $link: {$resp.status-line}";
+                $doc = "";
+            }
         }
         when 'file' {
-            $doc = slurp(@url[3]);
+            $doc = slurp($path);
         }
         when '' {
-            $doc = slurp(@url[3]);
+            $doc = slurp($path);
         }
     }
     if $doc {
-        given @url[3].split('.')[*-1] {
+        given $path.split('.')[*-1] {
             when 'txt' { return '<pre>' ~ $doc.&escape-markup ~ '</pre>'; }
             when 'html' | 'xhtml' { return $doc }
         }
