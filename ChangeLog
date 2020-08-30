@@ -1,3 +1,8 @@
+2020-08-29  Norbert Buchmueller <norbi@nix.hu>
+
+	* lib/Pod/To/BigPage.pm6: Switched from LWP::Simple to HTTP::UserAgent
+	* t/P.t: Fixed fallout from Perl 6 to Raku rename
+
 2019-01-13  Juan J. merelo  <jmerelo@penny>
 
 	* META6.json: Bumps up after fixing the problem with links-that-were-arrays: https://github.com/perl6/perl6-pod-to-bigpage/issues/34
